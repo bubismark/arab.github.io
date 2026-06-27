@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ערבית – סיפור 1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap');
+:root {
+  --bg:#0d1117; --surface:#161b22; --card:#1c2230;
+  --border:rgba(255,255,255,0.09); --accent:#e8b84b; --green:#4caf82;
+  --red:#e05c5c; --text:#e6edf3; --muted:#7d8590;
+  --hl:rgba(232,184,75,0.13); --hl2:rgba(232,184,75,0.28);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Rubik',sans-serif;}
+
+header{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:10px 18px;display:flex;align-items:center;gap:10px;
+  position:sticky;top:0;z-index:100;}
+.logo{font-size:17px;font-weight:700;color:var(--accent);}
+.logo span{color:var(--muted);font-weight:300;font-size:13px;}
+
+/* PLAYER */
+.player-wrap{max-width:820px;margin:16px auto 0;padding:0 14px;}
+.player-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;}
+audio{width:100%;accent-color:var(--accent);display:block;}
+.prog{margin-top:8px;height:4px;background:var(--border);border-radius:4px;cursor:pointer;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);width:0%;transition:width .1s linear;}
+.speed-row{margin-top:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.speed-label{font-size:11px;color:var(--muted);}
+.sp{background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:3px 11px;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;}
+.sp:hover{border-color:var(--accent);color:var(--accent);}
+.sp.on{background:var(--accent);border-color:var(--accent);color:#0d1117;font-weight:700;}
+#tts-status{font-size:11px;color:var(--muted);margin-top:8px;direction:rtl;min-height:16px;}
+
+/* REPEAT PANEL */
+.repeat-panel{max-width:820px;margin:12px auto 0;padding:0 14px;}
+.repeat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;}
+.repeat-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px;direction:rtl;}
+.repeat-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;direction:rtl;}
+.repeat-label{font-size:12px;color:var(--muted);flex-shrink:0;}
+.repeat-select{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  padding:4px 10px;border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;}
+.repeat-btns{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px;}
+.rbtn{background:transparent;border:1px solid var(--border);color:var(--muted);
+  padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;
+  transition:all .12s;}
+.rbtn:hover{border-color:var(--accent);color:var(--accent);}
+.rbtn.active{background:var(--accent);border-color:var(--accent);color:#0d1117;font-weight:700;}
+.rbtn.stop{border-color:var(--red);color:var(--red);}
+.rbtn.stop:hover{background:var(--red);color:#fff;}
+.repeat-status{font-size:12px;color:var(--green);margin-top:6px;direction:rtl;min-height:18px;}
+
+/* TITLE */
+.title-wrap{max-width:820px;margin:14px auto 0;padding:0 14px;text-align:center;}
+.title-tl{font-size:16px;font-weight:600;line-height:1.7;direction:rtl;}
+.title-he{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* STORY */
+.story{max-width:820px;margin:0 auto;padding:14px 14px 120px;}
+
+/* SEGMENT */
+.seg{display:flex;align-items:flex-start;gap:6px;padding:8px 10px;
+  border-radius:12px;margin-bottom:7px;direction:rtl;
+  border-right:3px solid transparent;transition:background .2s,border-color .2s;}
+.seg.cur{background:var(--hl);border-right-color:var(--accent);}
+.seg.past{opacity:.32;}
+.seg-left{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;}
+.seg-t{font-size:11px;color:var(--muted);min-width:32px;
+  cursor:pointer;direction:ltr;font-variant-numeric:tabular-nums;text-align:center;}
+.seg-t:hover{color:var(--accent);}
+/* repeat checkbox */
+.rep-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
+.seg-words{flex:1;display:flex;flex-wrap:wrap;gap:8px 5px;direction:rtl;align-items:flex-end;}
+
+/* WORD CARD */
+.wc{display:inline-flex;flex-direction:column;align-items:center;
+  padding:5px 8px;border-radius:8px;cursor:pointer;
+  border:1px solid transparent;transition:background .1s,border-color .1s;
+  user-select:none;-webkit-user-select:none;
+  background:none;font-family:inherit;min-width:36px;}
+.wc:hover,.wc:active{background:var(--hl);border-color:rgba(232,184,75,.25);}
+.wc.on{background:var(--hl2);border-color:var(--accent);}
+.wc.rich .wt{border-bottom:2px solid rgba(76,175,130,.75);}
+.wt{font-size:18px;color:var(--text);text-align:center;line-height:1.3;direction:rtl;}
+.wh{font-size:10px;color:var(--green);text-align:center;margin-top:4px;line-height:1.3;max-width:90px;direction:rtl;}
+.wa{font-family:'Scheherazade New',serif;font-size:15px;color:var(--muted);text-align:center;margin-top:2px;direction:rtl;}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.82);backdrop-filter:blur(6px);
+  z-index:500;align-items:flex-end;justify-content:center;}
+.ov.show{display:flex;}
+.mb{background:var(--surface);border:1px solid rgba(232,184,75,.28);
+  border-radius:22px 22px 0 0;width:100%;max-width:820px;
+  height:82vh;display:flex;flex-direction:column;
+  animation:up .2s ease;overflow:hidden;}
+@keyframes up{from{transform:translateY(32px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mb-top{flex-shrink:0;padding:18px 18px 0;}
+.mb-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.mb-word{direction:rtl;}
+.mb-tl{font-size:30px;font-weight:700;color:var(--accent);}
+.mb-ar{font-family:'Scheherazade New',serif;font-size:24px;color:var(--muted);margin-top:3px;direction:rtl;}
+.mb-close{background:var(--card);border:1px solid var(--border);color:var(--muted);
+  width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mb-close:hover{color:var(--text);}
+.tts{display:flex;align-items:center;gap:10px;width:100%;
+  background:rgba(232,184,75,.12);border:1px solid rgba(232,184,75,.4);
+  color:var(--accent);padding:10px 14px;border-radius:10px;
+  cursor:pointer;font-family:inherit;font-size:14px;font-weight:500;
+  transition:all .12s;margin-bottom:12px;}
+.tts:hover{background:rgba(232,184,75,.22);}
+.tts.go{border-color:var(--green);color:var(--green);background:rgba(76,175,130,.1);}
+.tts-ar{font-family:'Scheherazade New',serif;font-size:20px;direction:rtl;margin-right:auto;}
+.mb-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 18px 40px;}
+.tr-box{background:var(--card);border-radius:10px;padding:12px 16px;margin-bottom:12px;direction:rtl;}
+.tr-he{font-size:20px;font-weight:600;}
+.tr-note{font-size:12px;color:var(--muted);margin-top:4px;}
+.sec{font-size:10px;text-transform:uppercase;letter-spacing:2px;
+  color:var(--muted);margin:14px 0 6px;direction:rtl;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;direction:rtl;}
+.chip{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;}
+.chip .lbl{color:var(--muted);font-size:10px;display:block;margin-bottom:3px;}
+.chip.root .val{color:var(--accent);font-family:'Scheherazade New',serif;font-size:19px;direction:rtl;}
+.chip.binyan .val{color:#a78bfa;font-size:13px;}
+.affs{display:flex;gap:7px;flex-wrap:wrap;direction:rtl;}
+.af{background:var(--card);border-radius:9px;padding:8px 12px;font-size:12px;border-right:3px solid var(--green);}
+.af.s{border-right:none;border-left:3px solid var(--red);}
+.af .al{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;}
+.af .aa{font-family:'Scheherazade New',serif;font-size:19px;color:var(--accent);direction:rtl;}
+.af .at{font-size:12px;color:var(--text);direction:rtl;margin-top:2px;}
+.af .ah{font-size:11px;color:var(--muted);}
+table.ct{width:100%;border-collapse:collapse;font-size:12px;direction:rtl;}
+table.ct th{color:var(--muted);font-weight:500;padding:5px 8px;border-bottom:1px solid var(--border);text-align:right;font-size:11px;}
+table.ct td{padding:6px 8px;border-bottom:1px solid var(--border);text-align:right;}
+table.ct tr:last-child td{border-bottom:none;}
+.car{font-family:'Scheherazade New',serif;font-size:16px;color:var(--green);direction:rtl;}
+.syns{display:flex;gap:6px;flex-wrap:wrap;direction:rtl;}
+.syn{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:5px 12px;font-size:12px;display:flex;gap:6px;align-items:center;
+  cursor:pointer;transition:border-color .1s;}
+.syn:hover{border-color:var(--accent);}
+.sar{font-family:'Scheherazade New',serif;font-size:16px;color:var(--accent);direction:rtl;}
+.exs{display:flex;flex-direction:column;gap:8px;}
+.ex{background:var(--card);border-radius:9px;padding:10px 14px;direction:rtl;
+  cursor:pointer;border:1px solid transparent;transition:border-color .1s;}
+.ex:hover{border-color:rgba(232,184,75,.25);}
+.ex-tl{font-size:15px;margin-bottom:2px;}
+.ex-ar{font-family:'Scheherazade New',serif;font-size:17px;color:var(--muted);direction:rtl;}
+.ex-he{font-size:11px;color:var(--muted);margin-top:2px;}
+.cur{background:linear-gradient(135deg,rgba(232,184,75,.06),rgba(76,175,130,.06));
+  border:1px solid var(--border);border-radius:11px;
+  padding:12px 16px;font-size:13px;line-height:1.9;margin-top:14px;direction:rtl;}
+.cur strong{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">עַרָבִּית <span>/ عربي &nbsp;סיפור 1</span></div>
+</header>
+
+<div class="player-wrap">
+  <div class="player-box">
+    <audio id="aud" controls preload="auto"><source src="story1.mp3" type="audio/mpeg"></audio>
+    <div class="prog" id="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="speed-row">
+      <span class="speed-label">מהירות:</span>
+      <button class="sp" data-s="0.5">0.5×</button>
+      <button class="sp" data-s="0.75">0.75×</button>
+      <button class="sp on" data-s="1">1×</button>
+      <button class="sp" data-s="1.25">1.25×</button>
+      <button class="sp" data-s="1.5">1.5×</button>
+    </div>
+    <div id="tts-status"></div>
+  </div>
+</div>
+
+<!-- REPEAT PANEL -->
+<div class="repeat-panel">
+  <div class="repeat-box">
+    <div class="repeat-title">🔁 שינון שורות – בחר שורות עם ✓ ולחץ התחל</div>
+    <div class="repeat-row">
+      <span class="repeat-label">מרווח בין חזרות:</span>
+      <select class="repeat-select" id="rep-gap">
+        <option value="1500">1.5 שניות</option>
+        <option value="2000" selected>2 שניות</option>
+        <option value="3000">3 שניות</option>
+        <option value="4000">4 שניות</option>
+        <option value="5000">5 שניות</option>
+      </select>
+      <span class="repeat-label">מצב:</span>
+      <select class="repeat-select" id="rep-mode">
+        <option value="ar">ערבית בלבד</option>
+        <option value="ar-he" selected>ערבית ← עברית</option>
+        <option value="tl-he">תעתיק ← עברית</option>
+      </select>
+    </div>
+    <div class="repeat-btns">
+      <button class="rbtn" id="btn-rep-start" onclick="startRepeat()">▶ התחל שינון</button>
+      <button class="rbtn stop" id="btn-rep-stop" onclick="stopRepeat()" style="display:none">■ עצור</button>
+      <button class="rbtn" onclick="selectAll()">✓ סמן הכל</button>
+      <button class="rbtn" onclick="clearAll()">✗ נקה הכל</button>
+    </div>
+    <div class="repeat-status" id="rep-status"></div>
+  </div>
+</div>
+
+<div class="title-wrap">
+  <div class="title-tl">בְּהָאי לְ-בְּלָאד לָאזַם לְ-וָאחַד יִעְרַף יִחְכִּי עַל-קְלִילָה לַעְתֵּין</div>
+  <div class="title-he">במדינה הזאת צריך לדעת לדבר שתי שפות לפחות</div>
+</div>
+
+<div class="story" id="story"></div>
+
+<!-- MODAL -->
+<div class="ov" id="ov">
+  <div class="mb" id="mb">
+    <div class="mb-top">
+      <div class="mb-head">
+        <div class="mb-word">
+          <div class="mb-tl" id="m-tl"></div>
+          <div class="mb-ar" id="m-ar"></div>
+        </div>
+        <button class="mb-close" id="btn-close">✕</button>
+      </div>
+      <button class="tts" id="btn-tts">
+        <span id="tts-icon">🔊</span>
+        <span>לחץ לשמוע את המילה בערבית</span>
+        <span class="tts-ar" id="tts-ar"></span>
+      </button>
+    </div>
+    <div class="mb-body" id="mb-body">
+      <div class="tr-box">
+        <div class="tr-he" id="m-tr"></div>
+        <div class="tr-note" id="m-note"></div>
+      </div>
+      <div id="adv"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   WORD DATABASE – כל מילה שמופיעה בסיפור
+═══════════════════════════════════════ */
+const WD = {
+  // ── מילים מרכזיות עם הסבר מלא ──
+  "בַּסּ":{ar:"بس",tr:"חָתוּל",note:"גם = 'רק/מספיק' – אותה מילה, הקשר שונה!",
+    root:{ar:"بس",he:"קריאה לחתול"},binyan:"שם עצם",
+    pre:[],suf:[{tl:"-ה",ar:"ـة",he:"נקבה: בַּסָּה"}],
+    conj:[{p:"זכר",tl:"בַּסּ",ar:"بس",he:"חתול"},{p:"נקבה",tl:"בַּסָּה",ar:"بسة",he:"חתולה"},{p:"חיבה",tl:"בְּסֵיסֶה",ar:"بسيسة",he:"חתולה קטנה"}],
+    syn:[{ar:"قطة",tl:"קִטָּה",he:"ספרותי"},{ar:"هر",tl:"הֵרּ",he:"מצרי"}],
+    ex:[{tl:"לְ-בַּסּ רָקַּד",ar:"البس رقد",he:"החתול ישן"},{tl:"בַּסּ וּ-פָאר",ar:"بس وفار",he:"חתול ועכבר"}],
+    cur:"🐈 <strong>בַּסּ</strong> = חתול. אבל! בַּסּ גם = 'רק/מספיק'. אותה מילה – הקשר שונה לחלוטין."},
+  "מַרְבִּיָּה":{ar:"مربية",tr:"מְגַדֶּלֶת",note:"שורש ر-ب-ي = גידול וחינוך",
+    root:{ar:"ر-ب-ي",he:"גידול / חינוך"},binyan:"מִפְעִילָה – שם פועל נקבה",
+    pre:[{tl:"מְ-",ar:"مـ",he:"קידומת פועל פעיל"}],suf:[{tl:"-יָּה",ar:"ـية",he:"נקבה"}],
+    conj:[{p:"ז'",tl:"מְרַבִּי",ar:"مربي",he:"מגדל"},{p:"נ'",tl:"מְרַבִּיָּה",ar:"مربية",he:"מגדלת"},{p:"הוא",tl:"בִּירַבִּי",ar:"بيربي",he:"הוא מגדל"},{p:"היא",tl:"בִּתְרַבִּי",ar:"بتربي",he:"היא מגדלת"}],
+    syn:[{ar:"يربي",tl:"יְרַבִּי",he:"מגדל"},{ar:"تربية",tl:"תַּרְבִּיָּה",he:"חינוך"}],
+    ex:[{tl:"מְרַבִּיָּה בַּסּ",ar:"مربية بس",he:"מגדלת חתולים"},{tl:"בִּירַבּוּ אַוְלָד",ar:"بيربوا أولاد",he:"מגדלים ילדים"}],
+    cur:"🌱 שורש ر-ب-ي. ממנו <strong>רַבּ</strong> = אלוהים (המגדל), <strong>תַּרְבִּיָּה</strong> = חינוך."},
+  "עֵילָה":{ar:"عيلة",tr:"מִשְׁפָּחָה",note:"ספרותית: עָאאִלָה",
+    root:{ar:"ع-ي-ل",he:"תלות / פרנסה"},binyan:"שם עצם לבנטיני",
+    pre:[],suf:[{tl:"-ה",ar:"ـة",he:"נקבה"}],
+    conj:[{p:"שלי",tl:"עֵילְתִּי",ar:"عيلتي",he:"משפחתי"},{p:"שלך",tl:"עֵילְתַּק",ar:"عيلتك",he:"משפחתך"}],
+    syn:[{ar:"عائلة",tl:"עָאאִלָה",he:"ספרותי"},{ar:"أسرة",tl:"אֻסְרָה",he:"גרעינית"}],
+    ex:[{tl:"עֵילָה כְּבִירָה",ar:"عيلة كبيرة",he:"משפחה גדולה"}],
+    cur:"👨‍👩‍👧 <strong>רַבּ לְ-עֵילָה</strong> = ראש המשפחה. שורש ع-ي-ل = פרנסה ותמיכה."},
+  "לָאזַם":{ar:"لازم",tr:"צָרִיךְ / חַיָּיב",note:"לא מוטה לגוף – רק הפועל אחריו משתנה",
+    root:{ar:"ل-ز-م",he:"הכרחי / דבוק"},binyan:"שם תואר → מילת עזר",
+    pre:[],suf:[],
+    conj:[{p:"אני",tl:"לָאזַם אֲרוּחַ",ar:"لازم أروح",he:"אני צריך ללכת"},{p:"אתה",tl:"לָאזַם תְּרוּחַ",ar:"لازم تروح",he:"אתה צריך"},{p:"הוא",tl:"לָאזַם יְרוּחַ",ar:"لازم يروح",he:"הוא צריך"},{p:"אנחנו",tl:"לָאזַם נְרוּחַ",ar:"لازم نروح",he:"אנחנו צריכים"},{p:"הם",tl:"לָאזַם יְרוּחוּ",ar:"لازم يروحوا",he:"הם צריכים"}],
+    syn:[{ar:"يجب",tl:"יַגִ'ב",he:"ספרותי"},{ar:"مش لازم",tl:"מִש לָאזַם",he:"לא צריך"}],
+    ex:[{tl:"לָאזַם תָּאכֻל",ar:"لازم تاكل",he:"חייב לאכול"},{tl:"מִש לָאזַם",ar:"مش لازم",he:"לא צריך"}],
+    cur:"⚡ <strong>לָאזַם</strong> לא מוטה לגוף – נשאר אותו דבר לכולם!"},
+  "לְ-וָאחַד":{ar:"الواحد",tr:"לְאָדָם (כְּלָלִי)",note:"כמו 'on' בצרפתית",
+    root:{ar:"و-ح-د",he:"אחד / יחידות"},binyan:"שם עצם → כינוי כללי",
+    pre:[{tl:"לְ-",ar:"لـ",he:"ל– מילת יחס"},{tl:"אֶל-",ar:"الـ",he:"הـ יידוע"}],suf:[],
+    conj:[{p:"יחיד",tl:"וָאחַד",ar:"واحد",he:"אחד"},{p:"נקבה",tl:"וַחְדֶה",ar:"واحدة",he:"אחת"}],
+    syn:[{ar:"الإنسان",tl:"אֶל-אִינְסָאן",he:"האדם"}],
+    ex:[{tl:"לְ-וָאחַד מָא יַעְרַף",ar:"الواحد ما يعرف",he:"אדם לא יודע"}],
+    cur:"👤 כמו <strong>on</strong> בצרפתית – כינוי כללי שמחליף 'אני' כשרוצים להכליל."},
+  "יִעְרַף":{ar:"يعرف",tr:"יוֹדֵעַ / מַכִּיר",note:"שורש ע-ר-פ – קרוב לעברית!",
+    root:{ar:"ع-ر-ف",he:"ידיעה / הכרה"},binyan:"פועל משקל فَعَلَ",
+    pre:[{tl:"יְ-",ar:"يـ",he:"גוף שלישי יחיד"}],suf:[],
+    conj:[{p:"אני",tl:"בַּעְרַף",ar:"بعرف",he:"אני יודע"},{p:"אתה",tl:"בְּתַעְרַף",ar:"بتعرف",he:"אתה יודע"},{p:"את",tl:"בְּתַעְרְפִי",ar:"بتعرفي",he:"את יודעת"},{p:"הוא",tl:"בִּיעְרַף",ar:"بيعرف",he:"הוא יודע"},{p:"היא",tl:"בְּתַעְרַף",ar:"بتعرف",he:"היא יודעת"},{p:"אנחנו",tl:"בְּנַעְרַף",ar:"بنعرف",he:"אנחנו יודעים"},{p:"הם",tl:"בִּיעְרְפוּ",ar:"بيعرفو",he:"הם יודעים"}],
+    syn:[{ar:"يدري",tl:"יִדְרִי",he:"לבנטיני"},{ar:"يعلم",tl:"יַעְלַם",he:"ספרותי"}],
+    ex:[{tl:"מָא בַּעְרַף",ar:"ما بعرف",he:"אני לא יודע"},{tl:"בְּתַעְרַף תִחְכִּי עַרָבִּי?",ar:"بتعرف تحكي عربي؟",he:"אתה יודע לדבר ערבית?"}],
+    cur:"🧠 שורש ع-ر-ف. ממנו <strong>מַעְרִיפָה</strong> = ידע, <strong>מַעְרוּף</strong> = ידוע. קרוב לעברית ע-ר-פ!"},
+  "יִחְכִּי":{ar:"يحكي",tr:"מְדַבֵּר / מְסַפֵּר",note:"ממנו: חִכָּאיָה = סיפור/אגדה",
+    root:{ar:"ح-ك-ي",he:"חיקוי קול"},binyan:"פועל משקל فَعَلَ",
+    pre:[{tl:"יְ-",ar:"يـ",he:"גוף שלישי יחיד"}],suf:[],
+    conj:[{p:"אני",tl:"בְּחִכִּי",ar:"بحكي",he:"אני מדבר"},{p:"אתה",tl:"בְּתִחְכִּי",ar:"بتحكي",he:"אתה מדבר"},{p:"הוא",tl:"בִּיחְכִּי",ar:"بيحكي",he:"הוא מדבר"},{p:"אנחנו",tl:"מְנִחְכִּי",ar:"منحكي",he:"אנחנו"},{p:"הם",tl:"בִּיחְכּוּ",ar:"بيحكوا",he:"הם"}],
+    syn:[{ar:"يتكلم",tl:"יִתְכַּלַּם",he:"ספרותי"}],
+    ex:[{tl:"חֲכִּי-לִּי",ar:"حكيلي",he:"ספר לי"},{tl:"חִכָּאיָה",ar:"حكاية",he:"סיפור/אגדה"}],
+    cur:"💬 ממנו <strong>חִכָּאיָה</strong> = סיפור/אגדה. שורש ח-כ-י = חיקוי קול."},
+  "קְלִילָה":{ar:"القليلة",tr:"לְפָחוֹת / הַמְּעַט",note:"קַל עברית ↔ קְלִיל ערבית – אותו שורש!",
+    root:{ar:"ق-ل-ل",he:"מעט / זעיר"},binyan:"שם תואר נקבה מיודע",
+    pre:[{tl:"אֶל-",ar:"الـ",he:"הـ יידוע"}],suf:[{tl:"-ה",ar:"ـة",he:"נקבה"}],
+    conj:[{p:"ז'",tl:"קְלִיל",ar:"قليل",he:"מעט"},{p:"נ'",tl:"קְלִילָה",ar:"قليلة",he:"מעטה"},{p:"רבים",tl:"קְלִילִין",ar:"قليلين",he:"מעטים"}],
+    syn:[{ar:"على الأقل",tl:"עַלַ לְ-אַקַּל",he:"לפחות"},{ar:"شوي",tl:"שְׁוֵי",he:"קצת"}],
+    ex:[{tl:"קְלִיל קְלִיל",ar:"قليل قليل",he:"לאט לאט"}],
+    cur:"✨ <strong>קַל</strong> עברית ← <strong>קְלִיל</strong> ערבית = אותו שורש שמי עתיק!"},
+  "לַעְתֵּין":{ar:"لغتين",tr:"שְׁתֵּי שָׂפוֹת",note:"סיומת -תֵּין = זוגי נקבה",
+    root:{ar:"ل-غ-و",he:"דיבור / שפה"},binyan:"שם עצם – צורת זוגי",
+    pre:[],suf:[{tl:"-תֵּין",ar:"ـتين",he:"זוגי נקבה = שתי"}],
+    conj:[{p:"יחיד",tl:"לֻגַ'ה",ar:"لغة",he:"שפה"},{p:"זוגי",tl:"לַעְתֵּין",ar:"لغتين",he:"שתי שפות"},{p:"רבים",tl:"לֻגַ'את",ar:"لغات",he:"שפות"}],
+    syn:[{ar:"لسان",tl:"לִסָאן",he:"לשון"}],
+    ex:[{tl:"בְּתִחְכִּי כַּם לֻגַ'ה?",ar:"بتحكي كم لغة؟",he:"כמה שפות אתה מדבר?"}],
+    cur:"🔢 סיומת <strong>-תֵּין</strong> = שניים נקבה. בערבית 3 מספרים: יחיד / זוגי / רבים!"},
+  "פָּאר":{ar:"فار",tr:"עַכְבָּר",note:"רבים: פִּירָאן",
+    root:{ar:"ف-أ-ر",he:"עכבר"},binyan:"שם עצם",
+    pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"פָּאר",ar:"فار",he:"עכבר"},{p:"נקבה",tl:"פָּארָה",ar:"فأرة",he:"עכברה"},{p:"רבים",tl:"פִּירָאן",ar:"فيران",he:"עכברים"}],
+    syn:[{ar:"جرذ",tl:"גֻ'רְד",he:"חולדה"}],
+    ex:[{tl:"פָּאר וּ-בַּסּ",ar:"فار وبس",he:"עכבר וחתול"}],
+    cur:"🐭 <strong>אֶל-פָּאר וְ-לְ-בַּסּ</strong> = ז'אנר שלם של סיפורים עממיים!"},
+  "חְ'זַ'ק":{ar:"خزق",tr:"חוֹר בְּקִיר",note:"קיים רק בלהג לבנטיני!",
+    root:{ar:"خ-ز-ق",he:"לנקב"},binyan:"שם עצם דיאלקטאלי",
+    pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"חְ'זַ'ק",ar:"خزق",he:"חור"},{p:"רבים",tl:"חְ'זוּק",ar:"خزوق",he:"חורים"}],
+    syn:[{ar:"ثقب",tl:"תֻ'קְּב",he:"ספרותי"}],
+    ex:[{tl:"חְ'זַ'ק בְּ-חֵיט",ar:"خزق بالحيط",he:"חור בקיר"}],
+    cur:"🕳️ קיים <strong>רק</strong> בלהג הלבנטיני – לא קיים בשום מילון ספרותי."},
+  "חֵיט":{ar:"الحيط",tr:"קִיר",note:"קרוב לעברית חִיץ = מחיצה!",
+    root:{ar:"ح-ي-ط",he:"גדר / היקף"},binyan:"שם עצם לבנטיני",
+    pre:[{tl:"אֶל-",ar:"الـ",he:"הـ יידוע"}],suf:[],
+    conj:[{p:"יחיד",tl:"חֵיט",ar:"حيط",he:"קיר"},{p:"רבים",tl:"חִיטָאן",ar:"حيطان",he:"קירות"}],
+    syn:[{ar:"جدار",tl:"גִ'דָאר",he:"ספרותי"}],
+    ex:[{tl:"עַל לְ-חֵיט",ar:"على الحيط",he:"על הקיר"}],
+    cur:"🧱 קרוב לעברית <strong>חִיץ</strong> = מחיצה! אותו שורש שמי ח-י-ט."},
+  "דְּחַק":{ar:"ضحك",tr:"צָחַק",note:"מֻדְחִק = מצחיק",
+    root:{ar:"ض-ح-ك",he:"צחוק"},binyan:"פועל משקל فَعَلَ",
+    pre:[],suf:[],
+    conj:[{p:"אני",tl:"בַּדְּחַק",ar:"بضحك",he:"אני צוחק"},{p:"אתה",tl:"בְּתִדְחַק",ar:"بتضحك",he:"אתה צוחק"},{p:"הוא",tl:"בִּידְחַק",ar:"بيضحك",he:"הוא צוחק"},{p:"הוא עבר",tl:"דְּחַק",ar:"ضحك",he:"הוא צחק"},{p:"היא עבר",tl:"דִּחְקַת",ar:"ضحكت",he:"היא צחקה"}],
+    syn:[{ar:"كحكح",tl:"כַּחְכַח",he:"פרץ בצחוק"}],
+    ex:[{tl:"דְּחַק בְּ-חֻ'בֻּת",ar:"ضحك بخبث",he:"צחק בערמה"}],
+    cur:"😄 <strong>מֻדְחִק</strong> = מצחיק. <strong>דְּחַק עַל</strong> = רימה מישהו."},
+  "אַהְבַּל":{ar:"أهبل",tr:"טִפֵּשׁ",note:"צמד: אַהְבַּל וּגַ'שִׁים",
+    root:{ar:"ه-ب-ل",he:"טפשות"},binyan:"שם תואר משקל أَفْعَل",
+    pre:[{tl:"אַ-",ar:"أـ",he:"קידומת הגברה"}],suf:[],
+    conj:[{p:"ז'",tl:"אַהְבַּל",ar:"أهبل",he:"טיפש"},{p:"נ'",tl:"הַבְּלֶה",ar:"هبلة",he:"טיפשה"}],
+    syn:[{ar:"غبي",tl:"ע'ַבִּי",he:"ספרותי"},{ar:"أحمق",tl:"אַחְמַק",he:"מטומטם"}],
+    ex:[{tl:"אַהְבַּל וּ-גַ'שִׁים",ar:"أهبل وغشيم",he:"טיפש ונאיבי"}],
+    cur:"🤦 <strong>אַהְבַּל</strong> = חסר שכל. <strong>גַ'שִׁים</strong> = חסר ניסיון. יחד = הגרוע ביותר!"},
+  "גַ'שִׁים":{ar:"غشيم",tr:"נַאִיבִי / גּוֹלְמִי",note:"חסר ניסיון וכישורים",
+    root:{ar:"غ-ش-م",he:"גסות / חוסר כישורים"},binyan:"שם תואר",
+    pre:[],suf:[],
+    conj:[{p:"זכר",tl:"גַ'שִׁים",ar:"غشيم",he:"נאיבי"},{p:"נקבה",tl:"גַ'שִׁימֶה",ar:"غشيمة",he:"נאיבית"}],
+    syn:[{ar:"ساذج",tl:"סָאדִ'ג'",he:"ספרותי"}],
+    ex:[{tl:"גַ'שִׁים וּ-אַהְבַּל",ar:"غشيم وأهبل",he:"נאיבי וטיפש"}],
+    cur:"😇 מי שפועל בגסות כי לא מבין את הכללים = גולמי."},
+
+  // ── מילים בסיסיות – תרגום + דוגמאות ──
+  "בִּיוֹם":{ar:"بيوم",tr:"בְּיוֹם / יוֹם אֶחָד",note:"בְּ = ב + יוֹם = יום",
+    root:{ar:"ي-و-م",he:"יום"},binyan:"שם עצם + מילת יחס",pre:[{tl:"בְּ-",ar:"بـ",he:"ב– (ביום)"}],suf:[],
+    conj:[{p:"יחיד",tl:"יוֹם",ar:"يوم",he:"יום"},{p:"רבים",tl:"אַיָּאם",ar:"أيام",he:"ימים"}],
+    syn:[{ar:"ذات يوم",tl:"דָ'את יוֹם",he:"יום אחד (ספרותי)"}],
+    ex:[{tl:"כֻּל יוֹם",ar:"كل يوم",he:"כל יום"},{tl:"יוֹם וְלֵילָה",ar:"يوم وليلة",he:"יום ולילה"}],
+    cur:"📅 <strong>יוֹם</strong> = יום. זהה לעברית! שורש שמי משותף י-ו-מ."},
+  "וְסִלְהֻם":{ar:"وصلهم",tr:"הִגִּיעַ לָהֶם",note:"וְ=ו + סִל=הגיע + הֻם=להם",
+    root:{ar:"و-ص-ل",he:"הגיעה / חיבור"},binyan:"פועל עבר + כינוי",pre:[{tl:"וְ-",ar:"وـ",he:"ו– (חיבור)"}],suf:[{tl:"-הֻם",ar:"ـهم",he:"להם / אותם"}],
+    conj:[{p:"הגיע",tl:"וְסַל",ar:"وصل",he:"הגיע"},{p:"הגיעה",tl:"וְסְלַת",ar:"وصلت",he:"הגיעה"},{p:"הגיעו",tl:"וְסְלוּ",ar:"وصلوا",he:"הגיעו"}],
+    syn:[{ar:"أجاه",tl:"אַגַ'אה",he:"הגיע אליו (לבנטיני)"}],
+    ex:[{tl:"וְסַלְת מִן וֵין?",ar:"وصلت من وين؟",he:"מאיפה הגעת?"},{tl:"מָתָא בְּתִוְסַל?",ar:"متى بتوصل؟",he:"מתי תגיע?"}],
+    cur:"📬 שורש و-ص-ل = להגיע/לחבר. ממנו <strong>וָאצִל</strong> = חיבור, <strong>וַאסְלָה</strong> = מתכון (חיבור טעמים)!"},
+  "חַבַּר":{ar:"خبر",tr:"חֲדָשָׁה / מֵידָע",note:"ח׳ַבַּר = חדשה, ידיעה",
+    root:{ar:"خ-ب-ر",he:"ידיעה / מידע"},binyan:"שם עצם",pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"חַבַּר",ar:"خبر",he:"חדשה"},{p:"רבים",tl:"אַחְ'בָּאר",ar:"أخبار",he:"חדשות"}],
+    syn:[{ar:"نبأ",tl:"נַבַּא",he:"בשורה (ספרותי)"},{ar:"معلومة",tl:"מַעְלוּמֶה",he:"מידע"}],
+    ex:[{tl:"שוּ לְ-חַבַּר?",ar:"شو الخبر؟",he:"מה נשמע? (מילולית: מה החדשה?)"},{tl:"אַחְ'בָּאר לְ-יוֹם",ar:"أخبار اليوم",he:"חדשות היום"}],
+    cur:"📰 <strong>שוּ לְ-חַבַּר?</strong> = מה נשמע? ביטוי יומיומי נפוץ מאוד. <strong>אֶל-אַחְ'בָּאר</strong> = שם של ערוצי חדשות רבים."},
+  "נְסִיוּ":{ar:"نسيوا",tr:"שָׁכְחוּ",note:"שורש נ-ס-י = שכחה",
+    root:{ar:"ن-س-ي",he:"שכחה"},binyan:"פועל עבר רבים",pre:[],suf:[{tl:"-וּ",ar:"ـوا",he:"הם (רבים)"}],
+    conj:[{p:"אני",tl:"נְסִיט",ar:"نسيت",he:"שכחתי"},{p:"אתה",tl:"נְסִיט",ar:"نسيت",he:"שכחת"},{p:"הוא",tl:"נְסִי",ar:"نسي",he:"שכח"},{p:"הם",tl:"נְסִיוּ",ar:"نسيوا",he:"שכחו"}],
+    syn:[{ar:"طاح من باله",tl:"טָאח מִן בָּאלוּ",he:"נפל מדעתו (לבנטיני)"}],
+    ex:[{tl:"נְסִיט אִסְמַק",ar:"نسيت اسمك",he:"שכחתי את שמך"},{tl:"לָא תִנְסָא",ar:"لا تنسى",he:"אל תשכח"}],
+    cur:"🧠 שורש ن-س-ي. <strong>נִסְיָאן</strong> = שכחה. בעברית: <strong>נָשָׁה</strong> = שכח – קרוב!"},
+  "לְחָאלוּ":{ar:"لحاله",tr:"לְבַדּוֹ / לְעַצְמוֹ",note:"לְ=ל + חָאל=מצב + וּ=שלו",
+    root:{ar:"ح-و-ل",he:"מצב / מסביב"},binyan:"ביטוי – מילת יחס + שם עצם + כינוי",pre:[],suf:[{tl:"-וּ",ar:"ـه",he:"שלו"}],
+    conj:[{p:"שלי",tl:"לְחָאלִי",ar:"لحالي",he:"לבד (שלי)"},{p:"שלך",tl:"לְחָאלַק",ar:"لحالك",he:"לבד (שלך)"},{p:"שלה",tl:"לְחָאלְהָא",ar:"لحالها",he:"לבד (שלה)"},{p:"שלנו",tl:"לְחָאלְנָא",ar:"لحالنا",he:"לבד (שלנו)"}],
+    syn:[{ar:"بمفرده",tl:"בִּמַפְרַדוּ",he:"לבדו (ספרותי)"}],
+    ex:[{tl:"אָנָא לְחָאלִי",ar:"أنا لحالي",he:"אני לבד"},{tl:"חַלֵּינִי לְחָאלִי",ar:"خليني لحالي",he:"עזוב אותי לבד"}],
+    cur:"🧍 <strong>לְחָאלִי/לַקּ/לוּ/הָא</strong> = לבד שלי/שלך/שלו/שלה. ביטוי יומיומי מאוד!"},
+  "לַמָּא":{ar:"لما",tr:"כַּאֲשֶׁר / כְּשֶׁ-",note:"מילת חיבור זמנית",
+    root:{ar:"ل-م-ا",he:"כאשר"},binyan:"מילת חיבור",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"لما",tl:"לַמָּא",he:"כאשר"},{ar:"حين",tl:"חִין",he:"בעת (ספרותי)"}],
+    ex:[{tl:"לַמָּא שִׁפְתּוּ",ar:"لما شفتو",he:"כשראיתי אותו"},{tl:"לַמָּא כְּבַרְת",ar:"لما كبرت",he:"כשגדלתי"}],
+    cur:"⏰ <strong>לַמָּא</strong> = כאשר. מאוד נפוץ בלהג. בספרותית: عِنْدَمَا (עִינְדַמָא)."},
+  "שְׁוֵי":{ar:"شوي",tr:"קְצָת / מְעַט",note:"גם: לאט לאט = שְׁוֵי שְׁוֵי",
+    root:{ar:"ش-و-ي",he:"מעט / לצלות"},binyan:"שם תואר / תואר פועל",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"قليل",tl:"קְלִיל",he:"מעט"},{ar:"بس شوي",tl:"בַּסּ שְׁוֵי",he:"רק קצת"}],
+    ex:[{tl:"שְׁוֵי שְׁוֵי",ar:"شوي شوي",he:"לאט לאט / מעט מעט"},{tl:"בַּעַד שְׁוֵי",ar:"بعد شوي",he:"עוד מעט"}],
+    cur:"🐢 <strong>שְׁוֵי שְׁוֵי</strong> = לאט לאט – ביטוי אהוב! גם: <strong>בַּעַד שְׁוֵי</strong> = עוד קצת / תכף."},
+  "מִתִּל":{ar:"مثل",tr:"כְּמוֹ / דּוֹמֶה לְ-",note:"זהה לעברית 'מְשַׁל'!",
+    root:{ar:"م-ث-ل",he:"דמיון / משל"},binyan:"מילת יחס",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"زي",tl:"זֵיּ",he:"כמו (לבנטיני)"},{ar:"كأنه",tl:"כַּאַנּוּ",he:"כאילו"}],
+    ex:[{tl:"מִתִּל לְ-אַסַד",ar:"مثل الأسد",he:"כמו אריה"},{tl:"אִש מִתִּל הַאדָא?",ar:"إش مثل هادا؟",he:"מה זה כמו זה?"}],
+    cur:"⚖️ <strong>מִתִּל</strong> = כמו. אותו שורש כמו <strong>מָתַ'ל</strong> = פתגם/משל. בעברית: מָשָׁל – שורש משותף!"},
+  "וְפַזּ":{ar:"وفز",tr:"וְקָפַץ / וְנִבְהַל",note:"פַזּ = קפץ בהלה",
+    root:{ar:"ف-ز-ز",he:"קפיצה / בהלה"},binyan:"פועל עבר",pre:[{tl:"וְ-",ar:"وـ",he:"ו– חיבור"}],suf:[],
+    conj:[{p:"הוא",tl:"פַזּ",ar:"فز",he:"קפץ/נבהל"},{p:"היא",tl:"פַזַּת",ar:"فزت",he:"קפצה"},{p:"אני",tl:"פַזֵּיט",ar:"فزيت",he:"קפצתי"}],
+    syn:[{ar:"انتفض",tl:"אִנְתַפַּד",he:"התנער (ספרותי)"}],
+    ex:[{tl:"פַזֵּיט מִן לְ-נוֹם",ar:"فزيت من النوم",he:"התעוררתי בבהלה"},{tl:"שוּ פַזַּזְתַּק?",ar:"شو فززتك؟",he:"מה הבהיל אותך?"}],
+    cur:"😱 <strong>פַזּ מִן לְ-נוֹם</strong> = התעורר בבהלה מהשינה. ביטוי יומיומי מאוד."},
+  "לְמַעִת":{ar:"لمعت",tr:"נִצְנְצוּ / הֶאִירוּ",note:"לָמַע = נצנץ, הבריק",
+    root:{ar:"ل-م-ع",he:"נצוץ / ברק"},binyan:"פועל עבר נקבה",pre:[],suf:[{tl:"-ַת",ar:"ـت",he:"נקבה עבר"}],
+    conj:[{p:"הוא",tl:"לָמַע",ar:"لمع",he:"הבריק"},{p:"היא",tl:"לְמַעִת",ar:"لمعت",he:"הבריקה"},{p:"הם",tl:"לְמַעוּ",ar:"لمعوا",he:"הבריקו"}],
+    syn:[{ar:"بصّ",tl:"בַּצּ",he:"הבהיק"},{ar:"أضاء",tl:"אַדָּ'א",he:"האיר (ספרותי)"}],
+    ex:[{tl:"לָמַעִת עְיוּנוּ",ar:"لمعت عيونه",he:"עיניו נצנצו"},{tl:"לְ-דַ'הַב בִּילְמַע",ar:"الذهب بيلمع",he:"הזהב מבהיק"}],
+    cur:"✨ שורש ل-م-ع = ברק/נצוץ. <strong>לָמִע</strong> = מבהיק, <strong>לַמְעָה</strong> = רגע של ברק. קרוב ל'לַהַב' בעברית!"},
+  "פַגְ'אָה":{ar:"فجأة",tr:"פִּתְאוֹם",note:"ספרותי ומדובר – אותה מילה!",
+    root:{ar:"ف-ج-أ",he:"פתאומיות"},binyan:"תואר פועל",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"توّ",tl:"תַּוּ",he:"עכשיו/פתאום (לבנטיני)"},{ar:"بغتة",tl:"בַּע'ְתֶה",he:"פתאום (ספרותי)"}],
+    ex:[{tl:"פַגְ'אָה וְסַל",ar:"فجأة وصل",he:"פתאום הגיע"},{tl:"בְּלָא פַגְ'אָה",ar:"بلا فجأة",he:"בלי הפתעות"}],
+    cur:"⚡ <strong>מֻפָג'ְאָה</strong> (مفاجأة) = הפתעה – אותו שורש. כשאומרים 'מופג'אה!' בערבית = הפתעה!"},
+  "אִנְהָאר":{ar:"انهار",tr:"קָרַס / נִשְׁבַּר",note:"שורש נ-ה-ר = נהר + קריסה",
+    root:{ar:"ن-ه-ر",he:"נהר / זרימה → קריסה"},binyan:"פועל עבר (בניין VII)",pre:[{tl:"אִנְ-",ar:"انـ",he:"קידומת פסיבי/בניין VII"}],suf:[],
+    conj:[{p:"הוא",tl:"אִנְהָאר",ar:"انهار",he:"קרס"},{p:"היא",tl:"אִנְהָארַת",ar:"انهارت",he:"קרסה"},{p:"אני",tl:"אִנְהָארִיט",ar:"انهاريت",he:"קרסתי"}],
+    syn:[{ar:"وقع",tl:"וְקַע",he:"נפל"},{ar:"انكسر",tl:"אִנְכַּסַר",he:"נשבר"}],
+    ex:[{tl:"אִנְהָאר מִן לְ-תַּעַב",ar:"انهار من التعب",he:"קרס מעייפות"},{tl:"אֶל-בִּנָא אִנְהָאר",ar:"البنا انهار",he:"הבניין קרס"}],
+    cur:"🏚️ שורש ن-ه-ر. <strong>נַהַר</strong> = נהר – כמו מים שמציפים וקורסים. <strong>אִנְהִיָּאר</strong> = קריסה/נפילה."},
+  "מְחַרְמַד":{ar:"مخرمد",tr:"מְכֻוָּץ / מְצֻמָּק",note:"מילה דיאלקטאלית ציורית",
+    root:{ar:"خ-ر-م-د",he:"כיווץ/צמצום"},binyan:"שם תואר דיאלקטאלי",pre:[],suf:[],
+    conj:[{p:"זכר",tl:"מְחַרְמַד",ar:"مخرمد",he:"מכווץ"},{p:"נקבה",tl:"מְחַרְמַדֶה",ar:"مخرمدة",he:"מכווצת"}],
+    syn:[{ar:"منكمش",tl:"מֻנְכַּמֵש",he:"מכווץ (ספרותי)"},{ar:"مندس",tl:"מֻנְדַּס",he:"מסתתר"}],
+    ex:[{tl:"מְחַרְמַד מִן לְ-בַּרְד",ar:"مخرمد من البرد",he:"מכווץ מהקור"}],
+    cur:"🫙 מילה ציורית לבנטינית – מתארת מישהו שמתכווץ לתוך עצמו מפחד/קור. אין תרגום מדויק לעברית!"},
+  "מִסְתַּרְגִ'י":{ar:"مسترجي",tr:"מֵעֵז / מַעֵז לְ-",note:"שורש ר-ג'-י = להעז, לאמץ אומץ",
+    root:{ar:"ر-ج-و",he:"העזה / תקווה"},binyan:"בניין X – שם פועל",pre:[{tl:"מִסְ-תַ-",ar:"مستـ",he:"קידומת בניין X (ניסיון)"}],suf:[],
+    conj:[{p:"הוא",tl:"בִּיסְתַרְגִ'י",ar:"بيسترجي",he:"הוא מעז"},{p:"לא",tl:"מָא בִּיסְתַרְגִ'י",ar:"ما بيسترجي",he:"לא מעז"}],
+    syn:[{ar:"بيجرؤ",tl:"בִּיגְ'רַא",he:"מעז"},{ar:"عنده جرأة",tl:"עִינְדוּ גַ'רְאָה",he:"יש לו אומץ"}],
+    ex:[{tl:"מָא בִּיסְתַרְגִ'י יִחְכִּי",ar:"ما بيسترجي يحكي",he:"לא מעז לדבר"},{tl:"אִסְתַרְגִ'י!",ar:"استرجي!",he:"העז!"}],
+    cur:"💪 בניין X בערבית = לנסות להיות/לרצות להיות. <strong>מִסְתַרְגִ'י</strong> = מנסה לאמץ אומץ."},
+  "מִתְקַּרְטַל":{ar:"متقرطل",tr:"מְקֻפָּל / מְגֻלְגָּל מִפַּחַד",note:"מילה ציורית ייחודית",
+    root:{ar:"ق-ر-ط-ل",he:"התגלגלות/קיפול"},binyan:"שם תואר דיאלקטאלי",pre:[],suf:[],
+    conj:[{p:"זכר",tl:"מִתְקַּרְטַל",ar:"متقرطل",he:"מקופל"},{p:"נקבה",tl:"מִתְקַּרְטְלֶה",ar:"متقرطلة",he:"מקופלת"}],
+    syn:[{ar:"مجمع حاله",tl:"מְגַ'מַּע חָאלוּ",he:"מגולגל"},{ar:"خايف",tl:"חָ'איֵף",he:"מפוחד"}],
+    ex:[{tl:"מִתְקַּרְטַל מִן לְ-חוֹף",ar:"متقرطل من الخوف",he:"מגולגל מפחד"}],
+    cur:"😰 מילה ציורית שמתארת את הפחד הגופני – כשמישהו מתכווץ ומתגלגל כמו כדור מרוב פחד!"},
+  "מְעַנְתַּר":{ar:"معنتر",tr:"בְּגַאֲוָה / כְּגִיבּוֹר",note:"מעַנְתַּר = שם עצמי → 'כמו עַנְתַּר'",
+    root:{ar:"ع-ن-ت-ر",he:"גיבור עממי"},binyan:"שם תואר – מהשם עַנְתַּר",pre:[],suf:[],
+    conj:[{p:"זכר",tl:"מְעַנְתַּר",ar:"معنتر",he:"מתהדר/גאה"},{p:"נקבה",tl:"מְעַנְתְּרֶה",ar:"معنترة",he:"מתהדרת"}],
+    syn:[{ar:"فاخر",tl:"פָ'אחֵ'ר",he:"מתפאר"},{ar:"متبختر",tl:"מִתְבַּחְ'תַר",he:"מתנפח"}],
+    ex:[{tl:"טָ'לַע מְעַנְתַּר",ar:"طلع معنتر",he:"יצא בגאווה"},{tl:"שוּ מְעַנְתַּר אִנְתָא?",ar:"شو معنتر إنت؟",he:"כמה אתה מתנפח?"}],
+    cur:"🦁 <strong>עַנְתַּר</strong> = גיבור שיר עממי ערבי מהמאה ה-6. כשאומרים 'מְעַנְתַּר' = מתנהג כאילו הוא עַנְתַּר הגיבור!"},
+  "לִיַלְתַהֲמוּ":{ar:"ليلتهمه",tr:"כְּדֵי לִבְלֹעַ אוֹתוֹ",note:"לְ=כדי + יִלְתַהֵם=יבלע + וּ=אותו",
+    root:{ar:"ل-ه-م",he:"בליעה / בלע"},binyan:"פועל עתיד + מילת מטרה + כינוי",pre:[{tl:"לְ-",ar:"لـ",he:"כדי ל-"},{tl:"יְ-",ar:"يـ",he:"גוף שלישי"}],suf:[{tl:"-וּ",ar:"ـه",he:"אותו"}],
+    conj:[{p:"לבלוע",tl:"יִלְתַהֵם",ar:"يلتهم",he:"בולע"},{p:"בלע",tl:"אִלְתַהַם",ar:"التهم",he:"בלע"}],
+    syn:[{ar:"ياكله",tl:"יוֹכֻלוּ",he:"יאכל אותו"},{ar:"يبلعه",tl:"יִבְלַעוּ",he:"יבלע אותו"}],
+    ex:[{tl:"אִלְתַהַם לְ-אַכֵּל",ar:"التهم الأكل",he:"בלע את האוכל"},{tl:"בִּיִלְתַהֵם כֻּל שִׁי",ar:"بيلتهم كل شي",he:"בולע הכל"}],
+    cur:"😋 שורש ل-ه-م = בליעה מהירה. <strong>לַהֵם</strong> = להם – שורש שמי משותף לעברית!"},
+  "קַדָּאם":{ar:"قدام",tr:"מוּל / לִפְנֵי",note:"קדָּאם = מקביל לעברית 'קדם'!",
+    root:{ar:"ق-د-م",he:"קדמה / לפני"},binyan:"מילת יחס",pre:[],suf:[],
+    conj:[{p:"שלי",tl:"קֻדָּאמִי",ar:"قدامي",he:"מולי"},{p:"שלך",tl:"קֻדָּאמַק",ar:"قدامك",he:"מולך"},{p:"שלו",tl:"קֻדָּאמוּ",ar:"قدامو",he:"מולו"}],
+    syn:[{ar:"أمام",tl:"אַמָּאם",he:"לפני (ספרותי)"},{ar:"وراء",tl:"וַרָא",he:"אחרי"}],
+    ex:[{tl:"קֻדָּאמִי",ar:"قدامي",he:"מולי/לפני"},{tl:"קֻדָּאם לְ-בֵּית",ar:"قدام البيت",he:"מול הבית"}],
+    cur:"🏃 <strong>קדָּאם</strong> = מול/קדימה. <strong>וְרָא</strong> = אחורה. שניהם כיווני תנועה. קרוב לעברית 'קֶדֶם'!"},
+  "גְּוָּא":{ar:"جوا",tr:"בְּתוֹךְ / פְּנִימָה",note:"הפוך: בַּרָּא = בחוץ",
+    root:{ar:"ج-و-ا",he:"פנים / תוך"},binyan:"מילת מקום",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"داخل",tl:"דָ'אחֵל",he:"בתוך (ספרותי)"},{ar:"براّ",tl:"בַּרָּא",he:"בחוץ (הפוך)"}],
+    ex:[{tl:"גְּוָּא לְ-בֵּית",ar:"جوا البيت",he:"בתוך הבית"},{tl:"כֻּן גְּוָּא",ar:"كون جوا",he:"היה בפנים"}],
+    cur:"🏠 <strong>גְּוָּא</strong> = בפנים / פנימה. <strong>בַּרָּא</strong> = בחוץ. צמד חשוב מאוד! גְּוָּא-בַּרָּא = פנים-חוץ."},
+  "לַחְזָּה":{ar:"لحظة",tr:"רֶגַע / רֶגַע אֶחָד",note:"גם בספרותית – אותה מילה!",
+    root:{ar:"ل-ح-ظ",he:"מבט / רגע"},binyan:"שם עצם",pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"לַחְזָּה",ar:"لحظة",he:"רגע"},{p:"רבים",tl:"לַחַזָּאת",ar:"لحظات",he:"רגעים"}],
+    syn:[{ar:"ثانية",tl:"תָ'אנְיֶה",he:"שניה"},{ar:"دقيقة",tl:"דַּקִּיקָה",he:"דקה"}],
+    ex:[{tl:"לַחְזָּה לַחְזָּה!",ar:"لحظة لحظة!",he:"רגע רגע! (המתן!)"},{tl:"בְּהָאי לְ-לַחְזָּה",ar:"بهاي اللحظة",he:"ברגע הזה"}],
+    cur:"⏱️ <strong>לַחְזָּה</strong> = רגע. אותה מילה בדיוק בערבית ספרותית ומדוברת! שורש ל-ח-ז' = מבט מהיר."},
+  "אַרְגּוּךְ":{ar:"أرجوك",tr:"בְּבַקָּשָׁה / אֲנִי מְבַקֵּשׁ",note:"אַרְגוּ = אני מבקש + ק = אותך",
+    root:{ar:"ر-ج-و",he:"בקשה / תקווה"},binyan:"פועל עתיד + כינוי",pre:[],suf:[{tl:"-ק",ar:"ـك",he:"אותך"}],
+    conj:[{p:"אני מבקש ממך",tl:"אַרְגּוּק",ar:"أرجوك",he:"בבקשה (לזכר)"},{p:"ממנה",tl:"אַרְגּוּכִּי",ar:"أرجوكي",he:"בבקשה (לנקבה)"},{p:"מהם",tl:"אַרְגּוּכֻּם",ar:"أرجوكم",he:"בבקשה (לרבים)"}],
+    syn:[{ar:"من فضلك",tl:"מִן פַּדְּלַק",he:"בבקשה (ספרותי)"},{ar:"لو سمحت",tl:"לוֹ סַמַחְת",he:"אם אפשר"}],
+    ex:[{tl:"אַרְגּוּק, סָאעִידְנִי",ar:"أرجوك، ساعدني",he:"בבקשה, עזור לי"},{tl:"אַרְגּוּק לָא",ar:"أرجوك لا",he:"בבקשה לא"}],
+    cur:"🙏 <strong>אַרְגּוּק</strong> = בבקשה. שורש ر-ج-و = תקווה/בקשה. <strong>רַגַ'א</strong> = תקווה. <strong>אַרְגּוּ</strong> = אני מקווה/מבקש."},
+  "שוֹ":{ar:"شو",tr:"מָה / מַהוּ",note:"שוֹ = ما בלהג לבנטיני",
+    root:{ar:"ش-و",he:"מה"},binyan:"מילת שאלה",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"ما",tl:"מָא",he:"מה (ספרותי)"},{ar:"إيش",tl:"אֵיש",he:"מה (לבנטיני אחר)"}],
+    ex:[{tl:"שוּ לְ-חַבַּר?",ar:"شو الخبر؟",he:"מה נשמע?"},{tl:"שוּ בִּידַּק?",ar:"شو بيدك؟",he:"מה יש לך ביד?"},{tl:"שוּ יַעְנִי?",ar:"شو يعني؟",he:"מה זאת אומרת?"}],
+    cur:"❓ <strong>שוּ</strong> = מה. <strong>שוּ יַעְנִי</strong> = מה זאת אומרת / כלומר – ביטוי שגם עברים משתמשים בו!"},
+  "סַחִיח":{ar:"صحيح",tr:"נָכוֹן / אָמֵן / אָכֵן",note:"גם ספרותי – אותה מילה!",
+    root:{ar:"ص-ح-ح",he:"נכון / בריא"},binyan:"שם תואר",pre:[],suf:[],
+    conj:[{p:"זכר",tl:"סַחִיח",ar:"صحيح",he:"נכון"},{p:"נקבה",tl:"סַחִיחָה",ar:"صحيحة",he:"נכונה"},{p:"שאלה",tl:"סַחִיח?",ar:"صحيح؟",he:"נכון? אמת?"}],
+    syn:[{ar:"مزبوط",tl:"מַזְבּוּט",he:"נכון (לבנטיני)"},{ar:"بالظبط",tl:"בַּלְדַ'בְּט",he:"בדיוק"}],
+    ex:[{tl:"סַחִיח!",ar:"صحيح!",he:"נכון! אמת!"},{tl:"מָא סַחִיח",ar:"ما صحيح",he:"לא נכון"}],
+    cur:"✅ <strong>סִחָּה</strong> (صحة) = בריאות/נכונות. כשאומרים <strong>סִחְתֵּין!</strong> = לבריאות (כמו 'לחיים'). שורש ص-ح-ح."},
+  "אָנָא":{ar:"أنا",tr:"אֲנִי",note:"זהה לעברית 'אָנֹכִי'!",
+    root:{ar:"أنا",he:"כינוי גוף ראשון"},binyan:"כינוי אישי",pre:[],suf:[],
+    conj:[{p:"אני",tl:"אָנָא",ar:"أنا",he:"אני"},{p:"אתה",tl:"אִינְתָא",ar:"إنت",he:"אתה"},{p:"את",tl:"אִינְתִי",ar:"إنتي",he:"את"},{p:"הוא",tl:"הוּוֶּה",ar:"هو",he:"הוא"},{p:"היא",tl:"הִיֵּה",ar:"هي",he:"היא"},{p:"אנחנו",tl:"נַחְנָא",ar:"نحنا",he:"אנחנו"},{p:"הם",tl:"הֻמֵּה",ar:"همه",he:"הם"}],
+    syn:[],
+    ex:[{tl:"אָנָא בְּחִכִּי עַרָבִּי",ar:"أنا بحكي عربي",he:"אני מדבר ערבית"}],
+    cur:"👤 <strong>אָנָא</strong> = אני. זהה לעברית אנוכי! כינויי גוף – הבסיס לכל שיחה."},
+  "כֵּלֵב":{ar:"كلب",tr:"כֶּלֶב",note:"כמעט זהה לעברית!",
+    root:{ar:"ك-ل-ب",he:"כלב"},binyan:"שם עצם",pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"כֵּלֵב",ar:"كلب",he:"כלב"},{p:"נקבה",tl:"כַּלְבֶּה",ar:"كلبة",he:"כלבה"},{p:"רבים",tl:"כְּלָאב",ar:"كلاب",he:"כלבים"}],
+    syn:[{ar:"كلبون",tl:"כַּלְבוּן",he:"כלב (חיבה/גנאי)"}],
+    ex:[{tl:"כֵּלֵב חָ'רָא",ar:"كلب خارا",he:"כלב חרא (גידוף)"},{tl:"וְלַד לְ-כֵּלֵב",ar:"ولد الكلب",he:"בן כלב (גידוף)"}],
+    cur:"🐕 <strong>כֵּלֵב</strong> = כלב. כמעט זהה לעברית! שורש שמי משותף כ-ל-ב."},
+  "הָרַב":{ar:"هرب",tr:"בָּרַח",note:"שורש ה-ר-ב = בריחה",
+    root:{ar:"ه-ر-ب",he:"בריחה"},binyan:"פועל עבר",pre:[],suf:[],
+    conj:[{p:"הוא",tl:"הָרַב",ar:"هرب",he:"ברח"},{p:"היא",tl:"הָרְבַת",ar:"هربت",he:"ברחה"},{p:"אני",tl:"הָרַבִּיט",ar:"هربت",he:"ברחתי"},{p:"הם",tl:"הָרְבוּ",ar:"هربوا",he:"ברחו"}],
+    syn:[{ar:"راح",tl:"רָאח",he:"הלך/ברח"},{ar:"فرّ",tl:"פַּר",he:"ברח (ספרותי)"}],
+    ex:[{tl:"הָרַב מִן לְ-מֶדְרַסֶה",ar:"هرب من المدرسة",he:"ברח מהבית ספר"},{tl:"לָא תְּהְרַב",ar:"لا تهرب",he:"אל תברח"}],
+    cur:"🏃 <strong>הְרוּב</strong> (هروب) = בריחה. <strong>מֻהָרִּב</strong> = מבריח. שורש ה-ר-ב קרוב לעברית 'בָּרַח' – שורש שמי!"},
+  "קָאל":{ar:"قال",tr:"אָמַר",note:"שורש ק-ו-ל = אמירה/קול",
+    root:{ar:"ق-و-ل",he:"אמירה / קול"},binyan:"פועל עבר",pre:[],suf:[],
+    conj:[{p:"הוא",tl:"קָאל",ar:"قال",he:"אמר"},{p:"היא",tl:"קָאלַת",ar:"قالت",he:"אמרה"},{p:"אני",tl:"קֻלְּט",ar:"قلت",he:"אמרתי"},{p:"הם",tl:"קָאלוּ",ar:"قالوا",he:"אמרו"},{p:"הווה",tl:"בְּיוּל",ar:"بيقول",he:"אומר"}],
+    syn:[{ar:"حكى",tl:"חֲכָא",he:"סיפר/אמר"},{ar:"نطق",tl:"נַטַק",he:"הגה (ספרותי)"}],
+    ex:[{tl:"קָאל שוּ?",ar:"قال شو؟",he:"אמר מה?"},{tl:"קֻלְּט לַק",ar:"قلت لك",he:"אמרתי לך"}],
+    cur:"🗣️ שורש ق-و-ل = אמירה. ממנו <strong>קוֹל</strong> = קול, <strong>מִקְוָאל</strong> = ציטוט. קרוב לעברית 'קוֹל'!"},
+  "וְקָאל":{ar:"وقال",tr:"וְאָמַר",note:"וְ + קָאל = ו + אמר",
+    root:{ar:"ق-و-ل",he:"אמירה"},binyan:"פועל עבר + ו חיבור",pre:[{tl:"וְ-",ar:"وـ",he:"ו– חיבור"}],suf:[],
+    conj:[{p:"ו+אמר",tl:"וְקָאל",ar:"وقال",he:"ואמר"},{p:"ו+אמרה",tl:"וְקָאלַת",ar:"وقالت",he:"ואמרה"}],
+    syn:[],ex:[{tl:"וְקָאל לוּ",ar:"وقال له",he:"ואמר לו"}],
+    cur:"🔗 <strong>וְ-</strong> בערבית = ו בעברית. מחבר מילים ומשפטים. פשוט וחשוב!"},
+  "סְמַעִת":{ar:"سمعت",tr:"שָׁמַעְתִּי",note:"שורש ס-מ-ע – זהה לעברית!",
+    root:{ar:"س-م-ع",he:"שמיעה"},binyan:"פועל עבר גוף ראשון",pre:[],suf:[{tl:"-ִת",ar:"ـت",he:"גוף ראשון עבר"}],
+    conj:[{p:"אני",tl:"סְמַעִת",ar:"سمعت",he:"שמעתי"},{p:"אתה",tl:"סְמַעִת",ar:"سمعت",he:"שמעת"},{p:"הוא",tl:"סְמַע",ar:"سمع",he:"שמע"},{p:"אנחנו",tl:"סְמַעְנָא",ar:"سمعنا",he:"שמענו"}],
+    syn:[{ar:"انسمع",tl:"אִנְסַמַע",he:"נשמע"}],
+    ex:[{tl:"סְמַעִת מוּסִיקָא",ar:"سمعت موسيقى",he:"שמעתי מוזיקה"},{tl:"בְּתִסְמַע?",ar:"بتسمع؟",he:"אתה שומע?"}],
+    cur:"👂 שורש س-م-ع = שמיעה. <strong>זהה</strong> לשורש העברי ש-מ-ע! <strong>סַמִּיע</strong> = שומע, <strong>סַמָּאעֶה</strong> = אוזניות."},
+  "שׁוֹת":{ar:"صوت",tr:"קוֹל / צְלִיל",note:"שורש ص-و-ت = קול",
+    root:{ar:"ص-و-ت",he:"קול / צליל"},binyan:"שם עצם",pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"שׁוֹת",ar:"صوت",he:"קול"},{p:"רבים",tl:"אַשְׁוָאת",ar:"أصوات",he:"קולות"}],
+    syn:[{ar:"نبرة",tl:"נַבְּרָה",he:"נימה/גוון קול"}],
+    ex:[{tl:"שׁוֹת כְּבִיר",ar:"صوت كبير",he:"קול גדול/רם"},{tl:"חַטִּי לְ-שׁוֹת",ar:"حطي الصوت",he:"הנמך את הקול"}],
+    cur:"🔊 <strong>שׁוֹת</strong> = קול/צליל. גם = <strong>הצבעה</strong> (בחירות)! שׁוֹת = קול בחירות. שורש ص-و-ت."},
+  "הוֹן":{ar:"هون",tr:"פֹּה / כָּאן",note:"הפוך: הְנָאק = שם",
+    root:{ar:"ه-و-ن",he:"כאן"},binyan:"תואר מקום",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"هنا",tl:"הוּנָא",he:"כאן (ספרותי)"},{ar:"هناك",tl:"הְנָאק",he:"שם (הפוך)"}],
+    ex:[{tl:"תַּעָא הוֹן",ar:"تعا هون",he:"בוא לכאן"},{tl:"אָנָא הוֹן",ar:"أنا هون",he:"אני כאן"}],
+    cur:"📍 <strong>הוֹן</strong> = כאן. <strong>הְנָאק</strong> = שם. <strong>מִן הוֹן</strong> = מכאן. <strong>לַ-הוֹן</strong> = לכאן."},
+  "מִין":{ar:"مين",tr:"מִי / מִי זֶה",note:"שאלה על אדם",
+    root:{ar:"م-ي-ن",he:"מי"},binyan:"מילת שאלה",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"من",tl:"מַן",he:"מי (ספרותי)"}],
+    ex:[{tl:"מִין אִינְתָא?",ar:"مين إنت؟",he:"מי אתה?"},{tl:"מִין קָאל?",ar:"مين قال؟",he:"מי אמר?"}],
+    cur:"❓ <strong>מִין</strong> = מי. <strong>שוּ</strong> = מה. <strong>וֵין</strong> = איפה. <strong>אֵימְתָא</strong> = מתי. ארבע שאלות חשובות!"},
+  "נַאיְמִין":{ar:"نايمين",tr:"יְשֵׁנִים",note:"שורש נ-י-מ = שינה",
+    root:{ar:"ن-و-م",he:"שינה"},binyan:"שם תואר רבים",pre:[],suf:[{tl:"-ִין",ar:"ـين",he:"רבים"}],
+    conj:[{p:"יחיד",tl:"נָאיֵם",ar:"نايم",he:"ישן"},{p:"נקבה",tl:"נָאיְמֶה",ar:"نايمة",he:"ישנה"},{p:"רבים",tl:"נַאיְמִין",ar:"نايمين",he:"ישנים"}],
+    syn:[{ar:"راقد",tl:"רָאקֵד",he:"ישן (לבנטיני)"}],
+    ex:[{tl:"נִים!",ar:"نيم!",he:"לך לישון!"},{tl:"כֻּלְּהֻם נַאיְמִין",ar:"كلهم نايمين",he:"כולם ישנים"}],
+    cur:"😴 <strong>נוֹם</strong> = שינה. <strong>מְנָאם</strong> = חלום. <strong>נָם</strong> = ישן. <strong>לֵילֶה טַיְּבֶה</strong> = לילה טוב!"},
+  "אִנַּק":{ar:"إنك",tr:"שֶׁאַתָּה / כִּי אַתָּה",note:"אִן = שֶׁ + ק = אתה",
+    root:{ar:"إن",he:"שֶׁ / כי"},binyan:"מילת חיבור + כינוי",pre:[],suf:[{tl:"-ק",ar:"ـك",he:"אתה"}],
+    conj:[{p:"שאני",tl:"אִנִּי",ar:"إني",he:"שאני"},{p:"שאתה",tl:"אִנַּק",ar:"إنك",he:"שאתה"},{p:"שהוא",tl:"אִנּוּ",ar:"إنو",he:"שהוא"},{p:"שאנחנו",tl:"אִנַּא",ar:"إنا",he:"שאנחנו"}],
+    syn:[{ar:"أنك",tl:"אַנַּק",he:"שאתה (ספרותי)"}],
+    ex:[{tl:"שָׂאיֵר אִנַּק תִּגִּי",ar:"صاير إنك تيجي",he:"יוצא שאתה בא"},{tl:"אִנּוּ מַבְסוּט",ar:"إنو مبسوط",he:"שהוא שמח"}],
+    cur:"🔗 <strong>אִן</strong> = שֶׁ / כי (ממשיך משפט). <strong>אִנּוּ</strong> = שהוא, <strong>אִנְּהָא</strong> = שהיא. מאוד נפוץ!"},
+  "מָא":{ar:"ما",tr:"לֹא / שֶׁ-",note:"מָא = לא (שלילה) או שֶׁ (חיבור)",
+    root:{ar:"ما",he:"לא / מה"},binyan:"מילת שלילה",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"مش",tl:"מִש",he:"לא (דגשי)"},{ar:"لا",tl:"לָא",he:"לא (כללי)"}],
+    ex:[{tl:"מָא בַּעְרַף",ar:"ما بعرف",he:"אני לא יודע"},{tl:"מָא פִּי",ar:"ما في",he:"אין"},{tl:"מָא מִנּוּ",ar:"ما منو",he:"לא ממנו"}],
+    cur:"❌ <strong>מָא</strong> = לא. <strong>מִש</strong> = לא (יותר דגשי). <strong>לָא</strong> = לא (כללי). שלוש דרכים לשלול!"},
+  "לָא":{ar:"لا",tr:"לֹא / אֵין",note:"לָא = לא / אין",
+    root:{ar:"لا",he:"לא / אין"},binyan:"מילת שלילה",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"ما",tl:"מָא",he:"לא (שלילה)"},{ar:"مش",tl:"מִש",he:"לא (דגשי)"}],
+    ex:[{tl:"לָא שֻׁקְּרַן",ar:"لا شكرا",he:"לא תודה"},{tl:"לָא פִּי",ar:"لا في",he:"אין (אין שם)"},{tl:"לָא תְּרוּחַ",ar:"لا تروح",he:"אל תלך"}],
+    cur:"🚫 <strong>לָא</strong> = לא/אין. כמעט זהה לעברית! <strong>לָא-לָא</strong> = לא לא! הדגשה. שורש שמי משותף."},
+  "מִש":{ar:"مش",tr:"לֹא / לֹא...",note:"מִש = גרסה דגשית של מָא",
+    root:{ar:"مش",he:"לא"},binyan:"מילת שלילה לבנטינית",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"ما",tl:"מָא",he:"לא"},{ar:"مو",tl:"מוּ",he:"לא (מפרצי)"}],
+    ex:[{tl:"מִש כְּוַיֵּס",ar:"مش كويس",he:"לא טוב"},{tl:"מִש לָאזַם",ar:"مش لازم",he:"לא צריך"},{tl:"מִש מַעְקוּל",ar:"مش معقول",he:"לא יאמן"}],
+    cur:"💬 <strong>מִש מַעְקוּל!</strong> = לא יאמן! ביטוי מאוד נפוץ. <strong>מִש כְּוַיֵּס</strong> = לא טוב. <strong>מִש הֵיק</strong> = לא כך."},
+  "בֵּין":{ar:"بين",tr:"בֵּין",note:"כמעט זהה לעברית!",
+    root:{ar:"ب-ي-ن",he:"בין / ביניים"},binyan:"מילת יחס",pre:[],suf:[],
+    conj:[{p:"ביני",tl:"בֵּינִי",ar:"بيني",he:"ביני"},{p:"בינך",tl:"בֵּינַק",ar:"بينك",he:"בינך"},{p:"ביניהם",tl:"בֵּינַהֻם",ar:"بيناهم",he:"ביניהם"}],
+    syn:[{ar:"وسط",tl:"וָסַּט",he:"באמצע"}],
+    ex:[{tl:"בֵּינִי וּ-בֵּינַק",ar:"بيني وبينك",he:"בינינו"},{tl:"בֵּין לְ-בֵּית",ar:"بين البيوت",he:"בין הבתים"}],
+    cur:"🤝 <strong>בֵּין</strong> = בין. זהה לעברית! <strong>בֵּינִי וּ-בֵּינַק</strong> = בינינו – ביטוי לשמירת סוד."},
+  "פִּיה":{ar:"فيه",tr:"יֵשׁ / בּוֹ / שָׁם",note:"פִּי = יש/ב + ה = הוא",
+    root:{ar:"ف-ي",he:"יש / בתוך"},binyan:"מילת קיום + כינוי",pre:[],suf:[{tl:"-ה",ar:"ـه",he:"הוא/שם"}],
+    conj:[{p:"יש",tl:"פִּי",ar:"في",he:"יש / ב"},{p:"אין",tl:"מָא פִּי",ar:"ما في",he:"אין"},{p:"יש לי",tl:"פִּי עִינְדִּי",ar:"في عندي",he:"יש לי"},{p:"בו",tl:"פִּיה",ar:"فيه",he:"בו / בתוכו"}],
+    syn:[{ar:"موجود",tl:"מוֹגִ'וּד",he:"קיים"},{ar:"عنده",tl:"עִינְדוּ",he:"יש לו"}],
+    ex:[{tl:"פִּי מַשְׁכֵּלֶה?",ar:"في مشكلة؟",he:"יש בעיה?"},{tl:"מָא פִּי",ar:"ما في",he:"אין"}],
+    cur:"✅ <strong>פִּי</strong> = יש. <strong>מָא פִּי</strong> = אין. שניים מהמילים הכי שימושיות! <strong>פִּי עִינְדִּי</strong> = יש לי."},
+  "אִבֵּן":{ar:"ابن",tr:"בֵּן",note:"קרוב לעברית בֶּן!",
+    root:{ar:"ب-ن-و",he:"בן / בנייה"},binyan:"שם עצם",pre:[],suf:[],
+    conj:[{p:"יחיד",tl:"אִבֵּן",ar:"ابن",he:"בן"},{p:"נקבה",tl:"בִּינְת",ar:"بنت",he:"בת"},{p:"רבים",tl:"וְלָאד",ar:"ولاد",he:"ילדים/בנים"},{p:"שלי",tl:"אִבְּנִי",ar:"ابني",he:"בני"}],
+    syn:[{ar:"ولد",tl:"וָלַד",he:"ילד/בן"}],
+    ex:[{tl:"אִבֵּן עַמּוּ",ar:"ابن عمه",he:"בן דודו"},{tl:"אִבֵּן לְ-בַּלַד",ar:"ابن البلد",he:"בן המקום (מקומי)"}],
+    cur:"👦 <strong>אִבֵּן</strong> = בן. <strong>בִּינְת</strong> = בת. <strong>אִבֵּן עַמּ</strong> = בן דוד. <strong>אִבֵּן לְ-בַּלַד</strong> = מקומי/מוכר."},
+  "בְּדוּן":{ar:"بدون",tr:"בְּלִי / לְלֹא",note:"גם בספרותית – אותה מילה!",
+    root:{ar:"ب-د-و-ن",he:"ללא"},binyan:"מילת יחס",pre:[],suf:[],
+    conj:[],
+    syn:[{ar:"من دون",tl:"מִן דוּן",he:"ללא (מפורט)"},{ar:"بلا",tl:"בְּלָא",he:"בלי (ספרותי)"}],
+    ex:[{tl:"בְּדוּן מַיֵּה",ar:"بدون مية",he:"בלי מים"},{tl:"בְּדוּן כֵּלָאם",ar:"بدون كلام",he:"בלי מילים"},{tl:"בְּדוּן מוּ",ar:"بدون مو",he:"ללא לא / כן"}],
+    cur:"🚫 <strong>בְּדוּן</strong> = בלי. מאוד נפוץ. <strong>בְּדוּן שָׁכּ</strong> = בלי ספק. <strong>בְּדוּן סַבַּב</strong> = בלי סיבה."},
+  "סָאר":{ar:"صار",tr:"הָחֵל / קָרָה / נַעֲשָׂה",note:"סָאר = קרה/הפך/התחיל",
+    root:{ar:"ص-ي-ر",he:"קרה / הפך"},binyan:"פועל עבר רב-משמעי",pre:[],suf:[],
+    conj:[{p:"הוא",tl:"סָאר",ar:"صار",he:"קרה/הפך"},{p:"היא",tl:"סָארַת",ar:"صارت",he:"קרה/הפכה"},{p:"מה קרה",tl:"שוּ סָאר?",ar:"شو صار؟",he:"מה קרה?"},{p:"הווה",tl:"בִּיסִיר",ar:"بيصير",he:"קורה/מותר"}],
+    syn:[{ar:"صار",tl:"סָאר",he:"קרה"},{ar:"بيصير",tl:"בִּיסִיר",he:"אפשר/קורה"}],
+    ex:[{tl:"שוּ סָאר?",ar:"شو صار؟",he:"מה קרה?"},{tl:"מָא בִּיסִיר",ar:"ما بيصير",he:"לא ייתכן/אסור"},{tl:"בִּיסִיר?",ar:"بيصير؟",he:"אפשר? מותר?"}],
+    cur:"⚡ <strong>בִּיסִיר?</strong> = אפשר? מותר? – שימוש יומיומי! <strong>מָא בִּיסִיר</strong> = אסור/לא יכול להיות."},
+  "בַּעַד":{ar:"بعد",tr:"אַחֲרֵי / עוֹד",note:"בַּעַד = אחרי (זמן/מקום)",
+    root:{ar:"ب-ع-د",he:"אחרי / מרחק"},binyan:"מילת יחס / תואר זמן",pre:[],suf:[],
+    conj:[{p:"אחרי",tl:"בַּעַד",ar:"بعد",he:"אחרי"},{p:"עוד",tl:"בַּעְדֵּין",ar:"بعدين",he:"אחר כך"},{p:"לאחר מכן",tl:"מִן בַּעַד",ar:"من بعد",he:"לאחר מכן"}],
+    syn:[{ar:"بعدين",tl:"בַּעְדֵּין",he:"אחר כך"},{ar:"بعد ما",tl:"בַּעַד מָא",he:"לאחר שֶׁ-"}],
+    ex:[{tl:"בַּעַד שְׁוֵי",ar:"بعد شوي",he:"עוד קצת / תכף"},{tl:"בַּעְדֵּין",ar:"بعدين",he:"אחר כך"},{tl:"מִן בַּעַד",ar:"من بعد",he:"לאחר מכן"}],
+    cur:"⏰ <strong>בַּעְדֵּין</strong> = אחר כך – נפוץ מאוד! <strong>בַּעַד בַּכְּרָה</strong> = מחר. <strong>קַבְּל</strong> = לפני (הפוך)."},
+};
+
+/* ═══════════════════════════════════════
+   SEGMENTS
+═══════════════════════════════════════ */
+const S = [
+  {t:0, he:"יום אחד הגיעה אליהם חדשה בהפתעה, ונאלצו לנסוע",
+   w:[{tl:"בִּיוֹם",ar:"بيوم",he:"יוֹם אֶחָד",k:"בִּיוֹם"},{tl:"וְסִלְהֻם",ar:"وصلهم",he:"הִגִּיעַ לָהֶם",k:"וְסִלְהֻם"},{tl:"חַבַּר",ar:"خبر",he:"חֲדָשָׁה",k:"חַבַּר"},{tl:"עַ-עַפְלֶה",ar:"على غفلة",he:"בְּהַפְתָּעָה"},{tl:"וְאִנְגַ'בְּרוּ",ar:"وانجبروا",he:"נֶאֶלְצוּ"},{tl:"יְסָאפְרוּ",ar:"يسافروا",he:"לִנְסוֹעַ"}]},
+  {t:4, he:"ומרוב לחץ שכחו את החתול לבד בבית בלי אוכל",
+   w:[{tl:"וּמִן",ar:"ومن",he:"וּמִ-"},{tl:"עַמָא",ar:"عمى",he:"עִוְּרוֹן"},{tl:"קַלְבֻּהֻם",ar:"قلبهم",he:"לִבָּם"},{tl:"נְסִיוּ",ar:"نسيوا",he:"שָׁכְחוּ",k:"נְסִיוּ"},{tl:"לְ-בַּסּ",ar:"البس",he:"הַחָתוּל",k:"בַּסּ"},{tl:"לְחָאלוּ",ar:"لحاله",he:"לְבַדּוֹ",k:"לְחָאלוּ"},{tl:"בְּל-בֵּית",ar:"بالبيت",he:"בַּבַּיִת"},{tl:"בְּדוּן",ar:"بدون",he:"בְּלִי",k:"בְּדוּן"},{tl:"אַכֶּל",ar:"أكل",he:"אוֹכֶל"}]},
+  {t:8, he:"עברו יומיים, והחתול החל להתפתל מרעב",
+   w:[{tl:"מַדִּיוּ",ar:"مضيوا",he:"עָבְרוּ"},{tl:"יוֹמֵין",ar:"يومين",he:"יוֹמַיִם"},{tl:"וְלְ-בַּסּ",ar:"والبس",he:"וְהַחָתוּל",k:"בַּסּ"},{tl:"סָאר",ar:"صار",he:"הָחֵל",k:"סָאר"},{tl:"יִתְלַוָּא",ar:"يتلوى",he:"מִתְפַּתֵּל"},{tl:"מִן",ar:"من",he:"מִ-"},{tl:"לְ-גּוּ",ar:"الجوع",he:"הָרָעָב"}]},
+  {t:14, he:"כשלא מצא אפילו פירור, נפל ארצה שבע חיים",
+   w:[{tl:"לַמָּא",ar:"لما",he:"כַּאֲשֶׁר",k:"לַמָּא"},{tl:"מָא",ar:"ما",he:"לֹא",k:"מָא"},{tl:"לַקַּא",ar:"لقى",he:"מָצָא"},{tl:"קִתְפוּתָה",ar:"قتفوتة",he:"פֵּרוּר"},{tl:"יוֹכֻלְהָא",ar:"يوكلها",he:"לֶאֱכֹל"},{tl:"אִרְתַמָא",ar:"ارتمى",he:"נָפַל"},{tl:"עַל-אַרְד",ar:"على الأرض",he:"עַל הָאָרֶץ"},{tl:"עָאיֵף",ar:"عايف",he:"שָׂבֵעַ חַיִּים"},{tl:"חֲיָאתוּ",ar:"حياته",he:"חַיָּיו"}]},
+  {t:19, he:"אחרי קצת הבחין בעכבר יוצא מחור בקיר",
+   w:[{tl:"בַּעַד",ar:"بعد",he:"אַחֲרֵי",k:"בַּעַד"},{tl:"שְׁוֵי",ar:"شوي",he:"קְצָת",k:"שְׁוֵי"},{tl:"לָמַח",ar:"لمح",he:"הִבְחִין"},{tl:"פָּאר",ar:"فار",he:"עַכְבָּר",k:"פָּאר"},{tl:"בִּיטְלַע",ar:"بيطلع",he:"יוֹצֵא"},{tl:"מִן",ar:"من",he:"מִ-"},{tl:"חְ'זַ'ק",ar:"خزق",he:"חוֹר",k:"חְ'זַ'ק"},{tl:"בְּלְ-חֵיט",ar:"بالحيط",he:"בַּקִּיר",k:"חֵיט"}]},
+  {t:24, he:"עיניו נצנצו וקפץ כמו שד, והחל לרדוף אחריו",
+   w:[{tl:"לְמַעִת",ar:"لمعت",he:"נִצְנְצוּ",k:"לְמַעִת"},{tl:"עְיוּנוּ",ar:"عيونه",he:"עֵינָיו"},{tl:"וְפַזּ",ar:"وفز",he:"וְקָפַץ",k:"וְפַזּ"},{tl:"מִתִּל",ar:"مثل",he:"כְּמוֹ",k:"מִתִּל"},{tl:"לְ-שֵּׁיְטָאן",ar:"الشيطان",he:"הַשֵּׁד"},{tl:"וְסָאר",ar:"وصار",he:"וְהֵחֵל",k:"סָאר"},{tl:"יְטָארְדוּ",ar:"يطارده",he:"לִרְדֹּף"}]},
+  {t:29, he:"אבל העכבר ברח כמו טיל והצליח לחזור לחור",
+   w:[{tl:"בַּסּ",ar:"بس",he:"אֲבָל",k:"בַּסּ"},{tl:"לְ-פָּאר",ar:"الفار",he:"הָעַכְבָּר",k:"פָּאר"},{tl:"הָרַב",ar:"هرب",he:"בָּרַח",k:"הָרַב"},{tl:"מִתִּל",ar:"مثل",he:"כְּמוֹ",k:"מִתִּל"},{tl:"לְ-סָּארוּחַ",ar:"الصاروخ",he:"הַטִּיל"},{tl:"וְקִדִר",ar:"وقدر",he:"וְהִצְלִיחַ"},{tl:"יִרְגַּע",ar:"يرجع",he:"לַחֲזֹר"},{tl:"לַלְ-חְ'זַ'ק",ar:"للخزق",he:"לַחוֹר",k:"חְ'זַ'ק"}]},
+  {t:35, he:"החתול קונן על מזלו ושרט את הקיר",
+   w:[{tl:"סָאר",ar:"صار",he:"הָחֵל",k:"סָאר"},{tl:"לְ-בַּסּ",ar:"البس",he:"הַחָתוּל",k:"בַּסּ"},{tl:"יִנְדַּב",ar:"يندب",he:"מִתְאַבֵּל"},{tl:"חַזּוּ",ar:"حظه",he:"מַזָּלוֹ"},{tl:"וִיחְ'מֵּשׁ",ar:"ويخمش",he:"וְשׁוֹרֵט"},{tl:"לְ-חֵיט",ar:"الحيط",he:"אֶת הַקִּיר",k:"חֵיט"}]},
+  {t:38, he:"קרס מול החור, וצפורי הבטן שלו מצייצות",
+   w:[{tl:"אִנְהָאר",ar:"انهار",he:"קָרַס",k:"אִנְהָאר"},{tl:"עַל-אַרְד",ar:"على الأرض",he:"עַל הָרִצְפָּה"},{tl:"קַדָּאם",ar:"قدام",he:"מוּל",k:"קַדָּאם"},{tl:"לְ-חְ'זַ'ק",ar:"الخزق",he:"הַחוֹר",k:"חְ'זַ'ק"},{tl:"וְעַצָּאפִיר",ar:"وعصافير",he:"צִפּוֹרֵי"},{tl:"בַּטְנוּ",ar:"بطنه",he:"בִּטְנוֹ"},{tl:"בְּתְצָאצִי",ar:"بتصاصي",he:"מְצַיְּצוֹת"}]},
+  {t:45, he:"והעכבר מכווץ בתוך החור, מפחד לנשום, מקופל מפחד",
+   w:[{tl:"וְלְ-פָּאר",ar:"والفار",he:"וְהָעַכְבָּר",k:"פָּאר"},{tl:"מְחַרְמַד",ar:"مخرمد",he:"מְכֻוָּץ",k:"מְחַרְמַד"},{tl:"גְּוָּא",ar:"جوا",he:"בְּתוֹךְ",k:"גְּוָּא"},{tl:"לְ-חְ'זַ'ק",ar:"الخزق",he:"הַחוֹר",k:"חְ'זַ'ק"},{tl:"מִש",ar:"مش",he:"לֹא",k:"מִש"},{tl:"מִסְתַּרְגִ'י",ar:"مسترجي",he:"מֵעֵז",k:"מִסְתַּרְגִ'י"},{tl:"יִתְנַפַּס",ar:"يتنفس",he:"לִנְשֹׁם"},{tl:"מִתְקַּרְטַל",ar:"متقرطل",he:"מְקֻפָּל",k:"מִתְקַּרְטַל"},{tl:"מִן",ar:"من",he:"מִ-"},{tl:"לְ-חוֹף",ar:"الخوف",he:"הַפַּחַד"}]},
+  {t:52, he:"פתאום הבהיק רעיון גאוני בראש החתול, והתרחק מהחור",
+   w:[{tl:"פַגְ'אָה",ar:"فجأة",he:"פִּתְאוֹם",k:"פַגְ'אָה"},{tl:"דָּוַת",ar:"ضاءت",he:"הֶאִירָה"},{tl:"פִּכְרָה",ar:"فكرة",he:"רַעְיוֹן"},{tl:"עַבְקַרִיָּה",ar:"عبقرية",he:"גְּאוֹנִי"},{tl:"בְּרָאס",ar:"براس",he:"בְּרֹאשׁ"},{tl:"לְ-בַּסּ",ar:"البس",he:"הַחָתוּל",k:"בַּסּ"},{tl:"וְאַבְעַד",ar:"وأبعد",he:"וְהִתְרַחֵק"},{tl:"עַן",ar:"عن",he:"מִ-"},{tl:"לְ-חְ'זַ'ק",ar:"الخزق",he:"הַחוֹר",k:"חְ'זַ'ק"}]},
+  {t:58, he:"וקם לנבוח כמו כלב, אורב לעכבר",
+   w:[{tl:"וּקָאם",ar:"وقام",he:"וְקָם"},{tl:"יְעַוִּי",ar:"يعوي",he:"נוֹבֵחַ"},{tl:"זֵיּ",ar:"زي",he:"כְּמוֹ"},{tl:"לְ-כֵּלֵב",ar:"الكلب",he:"הַכֶּלֶב",k:"כֵּלֵב"},{tl:"מְתַרְצַּד",ar:"مترصد",he:"אוֹרֵב"},{tl:"לַלְ-פָּאר",ar:"للفار",he:"לָעַכְבָּר",k:"פָּאר"}]},
+  {t:61, he:"(נביחת כלב)",
+   w:[{tl:"הַוָּא",ar:"هوا",he:"הַוָּא"},{tl:"הַוָּא",ar:"هوا",he:"הַוָּא"},{tl:"הַוָּא",ar:"هوا",he:"(נְבִיחָה)"}]},
+  {t:62, he:"העכבר נרגע ואמר לעצמו – נגמר!",
+   w:[{tl:"הָאדָא",ar:"هذا",he:"הַזֶּה"},{tl:"לְ-פָּאר",ar:"الفار",he:"הָעַכְבָּר",k:"פָּאר"},{tl:"טְמַאַנּ",ar:"اطمأن",he:"נִרְגַּע"},{tl:"קַלְבּוּ",ar:"قلبه",he:"לִבּוֹ"},{tl:"וְקָאל",ar:"وقال",he:"וְאָמַר",k:"וְקָאל"},{tl:"בְּחָאלוּ",ar:"بحاله",he:"לְעַצְמוֹ",k:"לְחָאלוּ"},{tl:"אִנְפָּרְגַ'ת",ar:"انفرجت",he:"נִגְמַר"}]},
+  {t:67, he:"ויצא בגאווה מהחור – והנה הוא בין טפרי החתול",
+   w:[{tl:"וּטְלַע",ar:"وطلع",he:"וְיָצָא"},{tl:"מְעַנְתַּר",ar:"معنتر",he:"בְּגַאֲוָה",k:"מְעַנְתַּר"},{tl:"מִן",ar:"من",he:"מִ-"},{tl:"לְ-חְ'זַ'ק",ar:"الخزق",he:"הַחוֹר",k:"חְ'זַ'ק"},{tl:"וְאַלָּא",ar:"وإلا",he:"וְהִנֵּה"},{tl:"הוּוֶּה",ar:"هو",he:"הוּא"},{tl:"בֵּין",ar:"بين",he:"בֵּין",k:"בֵּין"},{tl:"מְחָאלֵב",ar:"مخالب",he:"טְפָרֵי"},{tl:"לְ-בַּסּ",ar:"البס",he:"הַחָתוּל",k:"בַּסּ"}]},
+  {t:73, he:"כשהרים אותו לבולעו, אמר לו העכבר:",
+   w:[{tl:"לַמָּא",ar:"لما",he:"כַּאֲשֶׁר",k:"לַמָּא"},{tl:"רְפַעוּ",ar:"رفعه",he:"הֵרִים אוֹתוֹ"},{tl:"לִיַלְתַהֲמוּ",ar:"ليلتهمه",he:"לְבָלְעוֹ",k:"לִיַלְתַהֲמוּ"},{tl:"קָאל",ar:"قال",he:"אָמַר",k:"קָאל"},{tl:"לוּ",ar:"له",he:"לוֹ"},{tl:"לְ-פָּאר",ar:"الفار",he:"הָעַכְבָּר",k:"פָּאר"}]},
+  {t:77, he:"רגע רגע, לפני שתאכל אותי, בבקשה הסבר לי מה הסיפור",
+   w:[{tl:"לַחְזָּה",ar:"لحظة",he:"רֶגַע",k:"לַחְזָּה"},{tl:"לַחְזָּה",ar:"لحظة",he:"רֶגַע",k:"לַחְזָּה"},{tl:"קֻּבַּל",ar:"قبل",he:"לִפְנֵי"},{tl:"מָא",ar:"ما",he:"שֶׁ-",k:"מָא"},{tl:"תוֹכֻלְנִי",ar:"توكلني",he:"תֹּאכַל אוֹתִי"},{tl:"אַרְגּוּךְ",ar:"أرجوك",he:"בְּבַקָּשָׁה",k:"אַרְגּוּךְ"},{tl:"תְּפַהֲמְנִי",ar:"تفهمني",he:"הַסְבֵּר לִי"},{tl:"שוֹ",ar:"شو",he:"מָה",k:"שוֹ"},{tl:"לְ-סִּירָה",ar:"الصيرة",he:"הַסִּיפּוּר"}]},
+  {t:84, he:"שמעתי פה קול של כלב!",
+   w:[{tl:"אָנָא",ar:"أنا",he:"אֲנִי",k:"אָנָא"},{tl:"סְמַעִת",ar:"سمعت",he:"שָׁמַעְתִּי",k:"סְמַעִת"},{tl:"שׁוֹת",ar:"صوت",he:"קוֹל",k:"שׁוֹת"},{tl:"כֵּלֵב",ar:"كلب",he:"כֶּלֶב",k:"כֵּלֵב"},{tl:"הוֹן",ar:"هون",he:"פֹּה",k:"הוֹן"}]},
+  {t:87, he:"צחק החתול בערמה:",
+   w:[{tl:"דְּחַק",ar:"ضحك",he:"צָחַק",k:"דְּחַק"},{tl:"לְ-בַּסּ",ar:"البس",he:"הַחָתוּל",k:"בַּסּ"},{tl:"בְּחֻ'בֻּת",ar:"بخبث",he:"בְּעָרְמָה"}]},
+  {t:89, he:"על מה כלב? אין כלב ולא כלום",
+   w:[{tl:"כֵּלֵב",ar:"كلب",he:"כֶּלֶב",k:"כֵּלֵב"},{tl:"מִין",ar:"مين",he:"מִי",k:"מִין"},{tl:"וְלְ-נָּאס",ar:"والناس",he:"וְהָאֲנָשִׁים"},{tl:"נַאיְמִין",ar:"نايمين",he:"יְשֵׁנִים",k:"נַאיְמִין"},{tl:"לָא",ar:"لا",he:"אֵין",k:"לָא"},{tl:"פִּיה",ar:"فيه",he:"שָׁם",k:"פִּיה"},{tl:"כֵּלֵב",ar:"كلب",he:"כֶּלֶב",k:"כֵּלֵב"},{tl:"וְלָא",ar:"ولا",he:"וְלֹא"},{tl:"אִבֵּן",ar:"ابن",he:"בֵּן",k:"אִבֵּן"},{tl:"עַמּוּ",ar:"عمه",he:"דּוֹדוֹ"}]},
+  {t:94, he:"נכון שאתה טיפש ונאיבי, לא הגיע לך להבין",
+   w:[{tl:"סַחִיח",ar:"صحيح",he:"נָכוֹן",k:"סַחִיח"},{tl:"אִנַּק",ar:"إنك",he:"שֶׁאַתָּה",k:"אִנַּק"},{tl:"אַהְבַּל",ar:"أهبل",he:"טִפֵּשׁ",k:"אַהְבַּל"},{tl:"וְגַ'שִׁים",ar:"وغشيم",he:"וְנַאִיבִי",k:"גַ'שִׁים"},{tl:"מָא",ar:"ما",he:"לֹא",k:"מָא"},{tl:"חַקֶּלְּקֶה",ar:"حقلك",he:"הִגִּיעַ לְךָ"},{tl:"תְּפַהֲם",ar:"تفهم",he:"לְהָבִין"}]},
+  {t:99, he:"שבמדינה הזאת צריך לדעת לדבר לפחות שתי שפות",
+   w:[{tl:"אִנּוּ",ar:"إنه",he:"שֶׁ-",k:"אִנַּק"},{tl:"בְּהָאי",ar:"بهاي",he:"בָּזֹאת"},{tl:"לְ-בְּלָאד",ar:"البلاد",he:"הַמְּדִינָה"},{tl:"לָאזַם",ar:"لازم",he:"צָרִיךְ",k:"לָאזַם"},{tl:"לְ-וָאחַד",ar:"الواحد",he:"הָאָדָם",k:"לְ-וָאחַד"},{tl:"יִעְרַף",ar:"يعرف",he:"יֵדַע",k:"יִעְרַף"},{tl:"יִחְכִּי",ar:"يحكي",he:"לְדַבֵּר",k:"יִחְכִּי"},{tl:"עַל-קְלִילָה",ar:"عالقليلة",he:"לְפָחוֹת",k:"קְלִילָה"},{tl:"לַעְתֵּין",ar:"لغتين",he:"שְׁתֵּי שָׂפוֹת",k:"לַעְתֵּין"}]},
+];
+
+/* ═══════════════════════════════════════
+   TTS – Google Translate
+═══════════════════════════════════════ */
+let currentArText = '';
+let ttsAudio = null;
+
+function speak(text) {
+  if (!text) return;
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+  const btn = document.getElementById('btn-tts');
+  const icon = document.getElementById('tts-icon');
+  const status = document.getElementById('tts-status');
+  btn.classList.add('go'); icon.textContent = '🔈';
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
+  ttsAudio = new Audio(url);
+  ttsAudio.playbackRate = 0.85;
+  ttsAudio.onended = () => { btn.classList.remove('go'); icon.textContent='🔊'; ttsAudio=null; };
+  ttsAudio.onerror = () => { btn.classList.remove('go'); icon.textContent='🔊';
+    status.textContent='❌ שגיאת TTS – בדוק חיבור אינטרנט'; ttsAudio=null; };
+  ttsAudio.play().catch(e => {
+    btn.classList.remove('go'); icon.textContent='🔊';
+    status.textContent=`❌ ${e.message}`;
+  });
+}
+
+/* ═══════════════════════════════════════
+   REPEAT / DRILL ENGINE
+═══════════════════════════════════════ */
+let repTimer = null;
+let repQueue = [];
+let repIdx   = 0;
+
+function getCheckedSegs() {
+  return [...document.querySelectorAll('.rep-check:checked')]
+    .map(cb => parseInt(cb.dataset.si));
+}
+
+function startRepeat() {
+  const idxs = getCheckedSegs();
+  if (!idxs.length) {
+    document.getElementById('rep-status').textContent = '⚠️ בחר לפחות שורה אחת';
+    return;
+  }
+  stopRepeat();
+  repQueue = idxs;
+  repIdx = 0;
+  document.getElementById('btn-rep-start').style.display = 'none';
+  document.getElementById('btn-rep-stop').style.display = '';
+  drillNext();
+}
+
+function stopRepeat() {
+  clearTimeout(repTimer);
+  if (ttsAudio) { ttsAudio.pause(); ttsAudio = null; }
+  repQueue = [];
+  document.getElementById('btn-rep-start').style.display = '';
+  document.getElementById('btn-rep-stop').style.display = 'none';
+  document.getElementById('rep-status').textContent = '';
+}
+
+function drillNext() {
+  if (!repQueue.length) return;
+  const si  = repQueue[repIdx % repQueue.length];
+  repIdx++;
+  const seg = S[si];
+  const gap = parseInt(document.getElementById('rep-gap').value);
+  const mode = document.getElementById('rep-mode').value;
+
+  // highlight row
+  document.querySelectorAll('.seg').forEach(el => el.classList.remove('drill'));
+  const row = document.getElementById('seg'+si);
+  if (row) { row.classList.add('cur'); row.scrollIntoView({behavior:'smooth',block:'center'}); }
+
+  const round = Math.floor((repIdx-1)/repQueue.length)+1;
+  document.getElementById('rep-status').textContent =
+    `🔁 חזרה ${round} | שורה ${si+1}/${S.length}: ${seg.he}`;
+
+  function playAr(cb) {
+    if (ttsAudio) { ttsAudio.pause(); ttsAudio=null; }
+    const arText = seg.w.map(w=>w.ar).join(' ');
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(arText)}&tl=ar&client=tw-ob`;
+    ttsAudio = new Audio(url);
+    ttsAudio.playbackRate = 0.82;
+    ttsAudio.onended = () => { ttsAudio=null; if(cb) cb(); };
+    ttsAudio.onerror = () => { ttsAudio=null; if(cb) cb(); };
+    ttsAudio.play().catch(()=>{ if(cb) cb(); });
+  }
+
+  function playHe(cb) {
+    if (ttsAudio) { ttsAudio.pause(); ttsAudio=null; }
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(seg.he)}&tl=he&client=tw-ob`;
+    ttsAudio = new Audio(url);
+    ttsAudio.onended = () => { ttsAudio=null; if(cb) cb(); };
+    ttsAudio.onerror = () => { ttsAudio=null; if(cb) cb(); };
+    ttsAudio.play().catch(()=>{ if(cb) cb(); });
+  }
+
+  function afterAll() {
+    if (!repQueue.length) return;
+    repTimer = setTimeout(drillNext, gap);
+  }
+
+  if (mode === 'ar') {
+    playAr(() => repTimer = setTimeout(afterAll, gap));
+  } else if (mode === 'ar-he') {
+    playAr(() => {
+      repTimer = setTimeout(() => playHe(() => repTimer = setTimeout(afterAll, gap)), 1800);
+    });
+  } else { // tl – just Hebrew
+    playHe(() => repTimer = setTimeout(afterAll, gap));
+  }
+}
+
+function selectAll() {
+  document.querySelectorAll('.rep-check').forEach(cb => cb.checked = true);
+}
+function clearAll() {
+  document.querySelectorAll('.rep-check').forEach(cb => cb.checked = false);
+}
+
+/* ═══════════════════════════════════════
+   SPEED
+═══════════════════════════════════════ */
+const aud = document.getElementById('aud');
+document.querySelectorAll('.sp').forEach(btn => {
+  btn.addEventListener('click', () => {
+    aud.playbackRate = parseFloat(btn.dataset.s);
+    document.querySelectorAll('.sp').forEach(b => b.classList.toggle('on', b===btn));
+  });
+});
+
+/* ═══════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════ */
+aud.addEventListener('timeupdate', () => {
+  if (aud.duration)
+    document.getElementById('prog-fill').style.width = (aud.currentTime/aud.duration*100)+'%';
+  syncKaraoke();
+});
+document.getElementById('prog-bar').addEventListener('click', e => {
+  const r = e.currentTarget.getBoundingClientRect();
+  if (aud.duration) aud.currentTime = (e.clientX-r.left)/r.width*aud.duration;
+});
+
+/* ═══════════════════════════════════════
+   RENDER
+═══════════════════════════════════════ */
+function fmtT(s){ const m=Math.floor(s/60),ss=Math.floor(s%60); return m+':'+(ss<10?'0':'')+ss; }
+
+(function renderStory() {
+  const c = document.getElementById('story');
+  S.forEach((seg,si) => {
+    const row = document.createElement('div');
+    row.className='seg'; row.id='seg'+si;
+
+    // left: time + checkbox
+    const left = document.createElement('span');
+    left.className='seg-left';
+
+    const tspan = document.createElement('span');
+    tspan.className='seg-t'; tspan.textContent=fmtT(seg.t);
+    tspan.addEventListener('click',()=>{ aud.currentTime=seg.t; });
+    left.appendChild(tspan);
+
+    const cb = document.createElement('input');
+    cb.type='checkbox'; cb.className='rep-check'; cb.dataset.si=si;
+    cb.title='סמן לשינון';
+    left.appendChild(cb);
+
+    row.appendChild(left);
+
+    const words = document.createElement('span');
+    words.className='seg-words';
+    seg.w.forEach(w => {
+      const card = document.createElement('button');
+      card.type='button';
+      card.className='wc'+(w.k&&WD[w.k]?' rich':'');
+      card.innerHTML=`<span class="wt">${w.tl}</span><span class="wh">${w.he}</span><span class="wa">${w.ar}</span>`;
+      card.addEventListener('click',e=>{ e.stopPropagation(); openModal(w); });
+      words.appendChild(card);
+    });
+    row.appendChild(words);
+    c.appendChild(row);
+  });
+})();
+
+/* ═══════════════════════════════════════
+   KARAOKE SYNC
+═══════════════════════════════════════ */
+let curSeg=-1;
+function syncKaraoke() {
+  const t=aud.currentTime; let active=0;
+  for(let i=0;i<S.length;i++) if(t>=S[i].t) active=i;
+  if(active===curSeg) return;
+  if(curSeg>=0){ const o=document.getElementById('seg'+curSeg); if(o){o.classList.remove('cur');o.classList.add('past');} }
+  curSeg=active;
+  const el=document.getElementById('seg'+curSeg);
+  if(el){ el.classList.remove('past');el.classList.add('cur');el.scrollIntoView({behavior:'smooth',block:'center'}); }
+}
+
+/* ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ */
+let activeCard=null;
+function openModal(w) {
+  if(activeCard) activeCard.classList.remove('on');
+  document.querySelectorAll('.wc').forEach(c=>{
+    if(c.querySelector('.wt')?.textContent===w.tl&&c.querySelector('.wa')?.textContent===w.ar){
+      activeCard=c; c.classList.add('on');
+    }
+  });
+  const d=w.k?WD[w.k]:null;
+  currentArText=w.ar;
+  document.getElementById('m-tl').textContent=w.tl;
+  document.getElementById('m-ar').textContent=w.ar;
+  document.getElementById('tts-ar').textContent=w.ar;
+  document.getElementById('m-tr').textContent=w.he;
+  document.getElementById('m-note').textContent=d?d.note:'';
+  const adv=document.getElementById('adv');
+  if(d){
+    adv.innerHTML=`
+      <div class="sec">שורש ובניין</div>
+      <div class="chips">
+        <div class="chip root"><span class="lbl">שורש</span><span class="val">${d.root.ar}</span><span style="font-size:11px;color:var(--muted);display:block">${d.root.he}</span></div>
+        <div class="chip binyan"><span class="lbl">בניין / משקל</span><span class="val">${d.binyan}</span></div>
+      </div>
+      <div class="sec">תחיליות וסופיות</div>
+      <div class="affs">${
+        d.pre.length===0&&d.suf.length===0
+          ?'<span style="color:var(--muted);font-size:13px">אין תחיליות/סופיות ייחודיות</span>'
+          :d.pre.map(p=>`<div class="af"><div class="al">תחילית</div><div class="aa">${p.ar}</div><div class="at">${p.tl}</div><div class="ah">${p.he}</div></div>`).join('')
+          +d.suf.map(s=>`<div class="af s"><div class="al">סופית</div><div class="aa">${s.ar}</div><div class="at">${s.tl}</div><div class="ah">${s.he}</div></div>`).join('')
+      }</div>
+      <div class="sec">הטיה לפי גוף וזמן</div>
+      <div style="overflow-x:auto"><table class="ct">
+        <thead><tr><th>גוף</th><th>תעתיק</th><th>ערבית</th><th>עברית</th></tr></thead>
+        <tbody>${d.conj.map(r=>`<tr><td style="color:var(--muted)">${r.p}</td><td>${r.tl}</td><td class="car">${r.ar}</td><td style="color:var(--muted);font-size:11px">${r.he}</td></tr>`).join('')}</tbody>
+      </table></div>
+      <div class="sec">מילים נרדפות</div>
+      <div class="syns">${d.syn.map(s=>`<div class="syn" onclick="speak('${s.ar}')"><span class="sar">${s.ar}</span><span style="color:var(--text);font-size:12px">${s.tl}</span><span style="color:var(--muted);font-size:11px">${s.he}</span></div>`).join('')}</div>
+      <div class="sec">דוגמאות – לחץ להשמעה</div>
+      <div class="exs">${d.ex.map(e=>`<div class="ex" onclick="speak('${e.ar}')"><div class="ex-tl">${e.tl}</div><div class="ex-ar">${e.ar}</div><div class="ex-he">${e.he}</div></div>`).join('')}</div>
+      <div class="cur">${d.cur}</div>`;
+  } else {
+    adv.innerHTML=`<div style="margin-top:10px;padding:12px 16px;background:var(--card);border-radius:10px;direction:rtl;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:6px">מילה בסיסית</div>
+      <div style="font-size:16px;color:var(--text)">${w.he}</div>
+      <div style="font-family:'Scheherazade New',serif;font-size:20px;color:var(--accent);margin-top:6px;direction:rtl">${w.ar}</div>
+    </div>`;
+  }
+  document.getElementById('mb-body').scrollTop=0;
+  document.getElementById('ov').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('ov').classList.remove('show');
+  if(activeCard){activeCard.classList.remove('on');activeCard=null;}
+}
+document.getElementById('ov').addEventListener('click',e=>{if(e.target===document.getElementById('ov'))closeModal();});
+document.getElementById('btn-close').addEventListener('click',closeModal);
+document.getElementById('btn-tts').addEventListener('click',()=>speak(currentArText));
+document.getElementById('mb').addEventListener('click',e=>e.stopPropagation());
+</script>
+</body>
+</html>
