@@ -138,6 +138,47 @@
   }
   button.ghost:hover{background:rgba(180,80,47,.08)}
   .count{font-size:.83rem;color:var(--mute);margin-inline-start:auto}
+  .study-controls{
+    margin-top:.75rem;
+    display:flex;
+    gap:.7rem;
+    align-items:center;
+    flex-wrap:wrap;
+    direction:rtl;
+  }
+  .study-controls .hint-mini{font-size:.8rem;color:var(--mute)}
+  .threshold-wrap{
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:999px;
+    padding:.26rem .6rem;
+  }
+  .threshold-wrap input[type="range"]{width:120px;accent-color:var(--olive)}
+  .threshold-wrap input[type="number"]{
+    width:4.1rem;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.18rem .3rem;
+    font-family:inherit;
+    background:var(--paper-deep);
+    color:var(--ink);
+  }
+  .threshold-wrap.dim{opacity:.55}
+  .toggle-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:.4rem;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:999px;
+    padding:.35rem .7rem;
+    font-size:.85rem;
+    color:var(--ink);
+  }
+  .toggle-pill input{accent-color:var(--olive)}
 
   /* ===== Cards ===== */
   .deck{
@@ -176,6 +217,65 @@
     border-bottom:1.5px solid var(--line);
     flex-wrap:wrap;
   }
+  .know-toggle{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    font-size:.82rem;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:.26rem .58rem;
+  }
+  .know-toggle input{accent-color:var(--olive)}
+  .stats-chip{
+    font-size:.76rem;
+    color:var(--mute);
+    background:rgba(91,110,58,.1);
+    border:1px solid rgba(91,110,58,.25);
+    border-radius:999px;
+    padding:.2rem .55rem;
+  }
+  .rate-badge{
+    font-size:.78rem;
+    font-weight:700;
+    color:var(--olive-deep);
+    background:#efe6d3;
+    border:1px solid #d8c8a7;
+    border-radius:999px;
+    padding:.22rem .55rem;
+  }
+  .ai-tools{
+    margin-top:.6rem;
+    display:flex;
+    gap:.5rem;
+    flex-wrap:wrap;
+    direction:rtl;
+  }
+  .ai-link,.ai-copy{
+    font-family:inherit;
+    font-size:.82rem;
+    border-radius:10px;
+    padding:.42rem .72rem;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    cursor:pointer;
+  }
+  .ai-link{
+    color:var(--paper);
+    background:var(--olive);
+    border:1px solid var(--olive-deep);
+  }
+  .ai-link:hover{background:var(--olive-deep)}
+  .ai-copy{
+    color:var(--clay);
+    background:transparent;
+    border:1px solid var(--clay-soft);
+  }
+  .ai-copy:hover{background:rgba(180,80,47,.08)}
   .flip-btn,.reveal-btn{
     font-family:inherit;font-weight:600;cursor:pointer;
     border:none;border-radius:20px;display:flex;align-items:center;gap:.4rem;
@@ -446,6 +546,23 @@
       </button>
       <span class="count" style="margin:0">עוברים על כל המילים בערבוב עד שתזכור את כולן</span>
     </div>
+    <div class="study-controls">
+      <label class="toggle-pill">
+        <input id="showAllKnown" type="checkbox" onchange="build()">
+        הצג גם מילים שכבר סימנתי כיודע
+      </label>
+      <label class="toggle-pill">
+        <input id="weakOnlyToggle" type="checkbox" onchange="toggleWeakOnly()">
+        תרגל רק מילים עד סף הצלחה
+      </label>
+      <div class="threshold-wrap" id="thresholdWrap">
+        <span>% הצלחה עד</span>
+        <input id="successThresholdRange" type="range" min="0" max="100" step="1" value="30" oninput="setSuccessThreshold(this.value, 'range')" onchange="build()">
+        <input id="successThresholdNumber" type="number" min="0" max="100" step="1" value="30" oninput="setSuccessThreshold(this.value, 'number')" onchange="build()">
+      </div>
+      <button class="ghost" type="button" onclick="resetProgress()">איפוס סימונים וסטטיסטיקה</button>
+      <span class="hint-mini" id="knownSummary"></span>
+    </div>
   </div>
 </section>
 
@@ -485,6 +602,152 @@
    אם הקובץ לא קיים — מוצג האמוג'י (שדה emoji) במקום, בלי שגיאה.
    ========================================================= */
 const IMG_DIR = "images/";
+const LS_KNOWN_KEY = "basma_known_words_v1";
+const LS_STATS_KEY = "basma_word_stats_v1";
+const LS_FILTER_KEY = "basma_filter_settings_v1";
+
+let KNOWN_WORDS = {};
+let WORD_STATS = {};
+let FILTER_SETTINGS = { weakOnly: false, maxSuccess: 30 };
+
+function loadProgress(){
+  try{
+    const knownRaw = localStorage.getItem(LS_KNOWN_KEY);
+    const statsRaw = localStorage.getItem(LS_STATS_KEY);
+    const filterRaw = localStorage.getItem(LS_FILTER_KEY);
+    KNOWN_WORDS = knownRaw ? JSON.parse(knownRaw) : {};
+    WORD_STATS = statsRaw ? JSON.parse(statsRaw) : {};
+    if(filterRaw){
+      const parsed = JSON.parse(filterRaw);
+      FILTER_SETTINGS.weakOnly = !!parsed.weakOnly;
+      FILTER_SETTINGS.maxSuccess = clampThreshold(parsed.maxSuccess);
+    }
+  }catch(_e){
+    KNOWN_WORDS = {};
+    WORD_STATS = {};
+    FILTER_SETTINGS = { weakOnly: false, maxSuccess: 30 };
+  }
+}
+
+function saveProgress(){
+  try{
+    localStorage.setItem(LS_KNOWN_KEY, JSON.stringify(KNOWN_WORDS));
+    localStorage.setItem(LS_STATS_KEY, JSON.stringify(WORD_STATS));
+    localStorage.setItem(LS_FILTER_KEY, JSON.stringify(FILTER_SETTINGS));
+  }catch(_e){ }
+}
+
+function clampThreshold(v){
+  const n = Number(v);
+  if(Number.isNaN(n)) return 30;
+  return Math.max(0, Math.min(100, Math.round(n)));
+}
+
+function syncFilterControls(){
+  const toggle = document.getElementById("weakOnlyToggle");
+  const range = document.getElementById("successThresholdRange");
+  const number = document.getElementById("successThresholdNumber");
+  const wrap = document.getElementById("thresholdWrap");
+  if(toggle) toggle.checked = !!FILTER_SETTINGS.weakOnly;
+  if(range) range.value = String(FILTER_SETTINGS.maxSuccess);
+  if(number) number.value = String(FILTER_SETTINGS.maxSuccess);
+  if(wrap) wrap.classList.toggle("dim", !FILTER_SETTINGS.weakOnly);
+}
+
+function toggleWeakOnly(){
+  const toggle = document.getElementById("weakOnlyToggle");
+  FILTER_SETTINGS.weakOnly = !!(toggle && toggle.checked);
+  syncFilterControls();
+  saveProgress();
+  build();
+}
+
+function setSuccessThreshold(v, source){
+  FILTER_SETTINGS.maxSuccess = clampThreshold(v);
+  const range = document.getElementById("successThresholdRange");
+  const number = document.getElementById("successThresholdNumber");
+  if(source !== "range" && range) range.value = String(FILTER_SETTINGS.maxSuccess);
+  if(source !== "number" && number) number.value = String(FILTER_SETTINGS.maxSuccess);
+  if(source === "number" && number) number.value = String(FILTER_SETTINGS.maxSuccess);
+  saveProgress();
+  if(FILTER_SETTINGS.weakOnly) build();
+}
+
+function ensureStats(word){
+  if(!WORD_STATS[word]){
+    WORD_STATS[word] = { shown:0, revealed:0, remembered:0, forgot:0 };
+  }
+  return WORD_STATS[word];
+}
+
+function bumpStat(word, key){
+  const s = ensureStats(word);
+  s[key] = (s[key] || 0) + 1;
+}
+
+function successRate(word){
+  const s = ensureStats(word);
+  const total = (s.remembered || 0) + (s.forgot || 0);
+  return total ? Math.round((s.remembered / total) * 100) : 0;
+}
+
+function buildAiPrompt(word, d){
+  return [
+    `אנא נתח את המילה הבאה בערבית פלסטינית-לבנטינית מדוברת: ${word}`,
+    `תעתיק עברי: ${d.translit || ""}`,
+    `משמעות בעברית: ${d.trans || ""}`,
+    "",
+    "כל ההסברים יהיו בעברית. כל מילה ערבית תלווה בתעתיק עברי מדויק בסוגריים מיד אחריה.",
+    "השתמש בפורמט: مثال (מִתַּ'אל) — דוגמה.",
+    "",
+    "אנא ספק:",
+    "1) 8 משפטי דוגמה מהיומיום בערבית מדוברת, עם תעתיק עברי מדויק ותרגום לעברית.",
+    "2) 8 מילים נרדפות ו-4 ניגודים בערבית לבנטינית — כל אחת עם תעתיק ותרגום לעברית.",
+    "3) ניתוח שורש, בניין, והטיות נפוצות (גוף ראשון/שני/שלישי, יחיד/רבים, ציווי) — כל צורה עם תעתיק.",
+    "4) קוריוז לשוני או תרבותי קצר שעוזר לזכור את המילה.",
+    "5) צירופים נפוצים ושגיאות שלומדים עבריים נוטים לעשות.",
+    "השתמש בדיאלקט פלסטיני-לבנטיני מדובר, לא ערבית ספרותית רשמית."
+  ].join("\n");
+}
+
+function googleAiSearchUrl(word, d){
+  const prompt = buildAiPrompt(word, d);
+  return "https://www.google.com/search?q=" + encodeURIComponent(prompt);
+}
+
+function isKnown(word){
+  return !!KNOWN_WORDS[word];
+}
+
+function passesSuccessFilter(word){
+  if(!FILTER_SETTINGS.weakOnly) return true;
+  const s = ensureStats(word);
+  const attempts = (s.remembered || 0) + (s.forgot || 0);
+  if(!attempts) return true;
+  return successRate(word) <= FILTER_SETTINGS.maxSuccess;
+}
+
+function setKnown(word, known){
+  if(known) KNOWN_WORDS[word] = true;
+  else delete KNOWN_WORDS[word];
+  saveProgress();
+  updateKnownSummary();
+}
+
+function updateKnownSummary(){
+  const summary = document.getElementById("knownSummary");
+  if(!summary) return;
+  const knownCount = Object.keys(KNOWN_WORDS).length;
+  summary.textContent = knownCount ? `${knownCount} מילים מסומנות כיודעות` : "";
+}
+
+function resetProgress(){
+  KNOWN_WORDS = {};
+  WORD_STATS = {};
+  saveProgress();
+  updateKnownSummary();
+  build();
+}
 
 /* =========================================================
    מאגר המילים — LEXICON
@@ -2245,6 +2508,14 @@ const LEXICON = {
    מנוע הרינדור — אל תיגע, זה רק מציג את המאגר.
    ========================================================= */
 function cardHTML(key, d, idx){
+  ensureStats(key);
+  const knownChecked = isKnown(key) ? "checked" : "";
+  const stats = WORD_STATS[key] || { shown:0, revealed:0, remembered:0, forgot:0 };
+  const rate = successRate(key);
+  const statsText = `נראה ${stats.shown || 0} · נחשף ${stats.revealed || 0} · זכרתי ${stats.remembered || 0} · לא זכרתי ${stats.forgot || 0}`;
+  const knowBlock = idx === "rv" ? "" : `<label class="know-toggle"><input class="know-check" type="checkbox" data-word="${attr(key)}" ${knownChecked}> אני יודע</label>`;
+  const aiPrompt = attr(buildAiPrompt(key, d));
+  const aiLink = googleAiSearchUrl(key, d);
   const morph = d.morph.map(m=>`
     <div class="mchip">
       <div class="m-ar">${m.ar}</div>
@@ -2276,7 +2547,7 @@ function cardHTML(key, d, idx){
     illus = `<div class="wc-illus"><span class="illus-fallback" style="display:flex">${fallback}</span></div>`;
   }
   return `
-  <article class="word-card" id="card-${idx}">
+  <article class="word-card" id="card-${idx}" data-word="${attr(key)}">
     <div class="wc-trans-row">
       <span class="lbl">תרגום</span>
       ${d.trans}
@@ -2292,6 +2563,9 @@ function cardHTML(key, d, idx){
       <button class="reveal-btn" type="button" onclick="toggleReveal(${idx})">
         <span class="eye">👁</span><span class="rv-label">חשוף</span>
       </button>
+      ${knowBlock}
+      <span class="rate-badge">הצלחה ${rate}%</span>
+      <span class="stats-chip">${statsText}</span>
       <span class="mode-tag" id="mode-${idx}">ערבית ← תרגום</span>
       <button class="flip-btn" type="button" onclick="flipCard(${idx})">⇄ הפוך כיוון</button>
     </div>
@@ -2318,6 +2592,13 @@ function cardHTML(key, d, idx){
       <div class="block related">
         <div class="label">מילים קרובות</div>
         <div class="morph">${rel}</div>
+      </div>
+      <div class="block">
+        <div class="label">AI עוזר מחקר</div>
+        <div class="ai-tools">
+          <a class="ai-link" href="${aiLink}" target="_blank" rel="noopener noreferrer">🔎 חיפוש בגוגל במצב AI</a>
+          <button class="ai-copy" type="button" data-ai-prompt="${aiPrompt}">📋 העתק פרומפט מלא</button>
+        </div>
       </div>
     </div>
   </article>`;
@@ -2376,17 +2657,52 @@ document.addEventListener("click", function(ev){
   if(t && typeof t.closest !== "function" && t.parentElement) t = t.parentElement;
   if(!t || typeof t.closest !== "function") return;
   const b = t.closest(".spk");
-  if(!b) return;
-  const text = b.getAttribute("data-say");
-  if(text) speak(text, b);
+  if(b){
+    const text = b.getAttribute("data-say");
+    if(text) speak(text, b);
+    return;
+  }
+
+  const aiBtn = t.closest(".ai-copy");
+  if(aiBtn){
+    const prompt = aiBtn.getAttribute("data-ai-prompt") || "";
+    if(!prompt) return;
+    const done = function(){
+      const old = aiBtn.textContent;
+      aiBtn.textContent = "הועתק";
+      setTimeout(function(){ aiBtn.textContent = old; }, 1200);
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(prompt).then(done).catch(function(){});
+    }
+    return;
+  }
+});
+
+document.addEventListener("change", function(ev){
+  const target = ev.target;
+  if(!target || !target.classList || !target.classList.contains("know-check")) return;
+  const word = target.getAttribute("data-word");
+  if(!word) return;
+  setKnown(word, !!target.checked);
+  const showAll = document.getElementById("showAllKnown");
+  if(showAll && !showAll.checked && target.checked){
+    build();
+  }
 });
 
 function toggleReveal(idx){
   const card = document.getElementById("card-"+idx);
+  if(!card) return;
   card.classList.toggle("revealed");
   const btn = card.querySelector(".reveal-btn");
   const lbl = card.querySelector(".rv-label");
-  if(card.classList.contains("revealed")){ btn.classList.add("open"); lbl.textContent="הסתר"; }
+  if(card.classList.contains("revealed")){
+    btn.classList.add("open");
+    lbl.textContent="הסתר";
+    const w = card.getAttribute("data-word");
+    if(w){ bumpStat(w, "revealed"); saveProgress(); }
+  }
   else { btn.classList.remove("open"); lbl.textContent="חשוף"; }
 }
 
@@ -2415,6 +2731,7 @@ function normalize(s){
 function build(){
   const raw = document.getElementById("input").value;
   const deck = document.getElementById("deck");
+  const showAll = !!(document.getElementById("showAllKnown") && document.getElementById("showAllKnown").checked);
   if(!raw.trim()){ deck.innerHTML = emptyState(); updateCount(0,0); return; }
 
   // קבל שורות; אם יש פסיקים — קח את החלק הראשון (המילה הערבית)
@@ -2432,14 +2749,22 @@ function build(){
       const k = Object.keys(LEXICON).find(key=>normalize(key)===nw);
       if(k) entry = LEXICON[k], w=k;
     }
-    if(entry){ html += cardHTML(w, entry, found); loaded.push(w); found++; }
+    if(entry){
+      loaded.push(w);
+      if((showAll || !isKnown(w)) && passesSuccessFilter(w)){
+        html += cardHTML(w, entry, found);
+        found++;
+      }
+    }
     else missing.push(w);
   });
 
-  LOADED_WORDS = loaded;
+  LOADED_WORDS = loaded.filter(w=>(showAll || !isKnown(w)) && passesSuccessFilter(w));
+  LOADED_WORDS.forEach(w=>bumpStat(w, "shown"));
+  saveProgress();
   const rb = document.getElementById("reviewBtn");
-  rb.disabled = loaded.length === 0;
-  rb.querySelector("span").textContent = loaded.length ? `התחל שינון (${loaded.length})` : "התחל שינון";
+  rb.disabled = LOADED_WORDS.length === 0;
+  rb.querySelector("span").textContent = LOADED_WORDS.length ? `התחל שינון (${LOADED_WORDS.length})` : "התחל שינון";
 
   if(missing.length){
     html += `<div class="empty" style="text-align:right;direction:rtl;">
@@ -2450,6 +2775,7 @@ function build(){
   }
   deck.innerHTML = html || emptyState();
   updateCount(found, words.length);
+  updateKnownSummary();
 }
 
 function emptyState(){
@@ -2467,6 +2793,7 @@ function clearAll(){
   const rb = document.getElementById("reviewBtn");
   rb.disabled = true;
   rb.querySelector("span").textContent = "התחל שינון";
+  updateKnownSummary();
 }
 
 /* =========================================================
@@ -2526,6 +2853,8 @@ function nextReviewCard(){
   updateRvStats();
   const word = RV.queue[0];
   RV.tries[word]++;
+  bumpStat(word, "shown");
+  saveProgress();
   const d = LEXICON[word] || (function(){
     const nw = normalize(word);
     const k = Object.keys(LEXICON).find(key=>normalize(key)===nw);
@@ -2577,10 +2906,13 @@ function recall(remembered){
   RV.passSeen++;
   if(remembered){
     RV.done++;
+    bumpStat(word, "remembered");
   } else {
     RV.queue.push(word);  // returns in the next round
     RV.nextRound.push(word);
+    bumpStat(word, "forgot");
   }
+  saveProgress();
   // a round ends when we've consumed every card scheduled for this pass
   if(RV.passSeen >= RV.passSize){
     if(RV.nextRound.length > 0){
@@ -2652,6 +2984,9 @@ function reviewHardOnly(){
 // טען דמו ראשוני
 function initApp(){
   try{
+    loadProgress();
+    syncFilterControls();
+    updateKnownSummary();
     document.getElementById("input").value = "صحن\nمخلل\nبقدونس\nحبة\nحُط\nبدون\nفحص\nإرتاح\nقرر\nزينة\nغدا\nلمّا\nطفى\nركض\nنقل\nتبّع\nلطيف\nساحر\nإلى\nأرنب\nدوّر على\nلاقى\nتوتّر\nمسك\nطول الوقت\nورقة\nكمّل\nتطلّع\nملوّن\nغيمة\nوصل\nنشّف\nإكتشف\nعادة\nإستقبل\nزار\nصينية\nمعمول\nحتى\nبناية\nقصة\nإمتحان\nمحطة\nخاف\nتأخر\nخسر\nصديق\nساق\nرصيف\nضو\nممنون\nوصّل\nيبدأ\nساوى\nسافر\nجاوب\nحافظ\nحاول\nسامح\nحب\nمشي\nقديم\nطلب\nسادة\nدايمًا\nموّى\nورا\nضعيف\nبيّن\nإنها\nجوعان\nدخّل\nخلّى\nوافق\nدار باله\nنظف\nسمّى\nلعب\nرزان\nجنينة\nدافي\nزهرة\nجوري\nمرمية\nغنّى\nواطي\nعصفور\nطار\nحواليها\nعم";
     build();
   }catch(err){
