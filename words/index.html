@@ -1,0 +1,2679 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>בַּסְמַה · ללמוד ערבית פלסטינית</title>
+
+<!-- PWA: manifest + theme -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3f4d28">
+
+<!-- iOS home-screen app settings -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="بَسْمَة">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+
+<style>
+  :root{
+    --ink:#1f1b16;
+    --paper:#f3ecdd;
+    --paper-deep:#e8ddc6;
+    --olive:#5b6e3a;
+    --olive-deep:#3f4d28;
+    --clay:#b4502f;
+    --clay-soft:#c9714f;
+    --gold:#c79a3a;
+    --line:#cbbc9e;
+    --mute:#7c715c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(91,110,58,.07), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(180,80,47,.07), transparent 42%),
+      var(--paper);
+    color:var(--ink);
+    font-family:"Frank Ruhl Libre","David Libre",Georgia,serif;
+    line-height:1.65;
+    min-height:100vh;
+    padding:0 0 5rem;
+  }
+
+  /* ===== Header ===== */
+  header{
+    position:relative;
+    padding:2.6rem 1.4rem 2.2rem;
+    text-align:center;
+    border-bottom:2px solid var(--line);
+    overflow:hidden;
+  }
+  header::before{
+    content:"";position:absolute;inset:0;
+    background-image:repeating-linear-gradient(45deg,
+      transparent 0 16px, rgba(91,110,58,.04) 16px 17px),
+      repeating-linear-gradient(-45deg,
+      transparent 0 16px, rgba(180,80,47,.04) 16px 17px);
+    pointer-events:none;
+  }
+  .brand{
+    position:relative;
+    font-family:"Amiri","Scheherazade New",serif;
+    direction:rtl;
+    font-size:clamp(2.8rem,9vw,4.6rem);
+    color:var(--olive-deep);
+    line-height:1;
+    letter-spacing:.02em;
+  }
+  .brand .vowel{color:var(--clay)}
+  .subtitle{
+    position:relative;
+    margin-top:.6rem;
+    color:var(--mute);
+    font-size:1rem;
+    letter-spacing:.04em;
+  }
+  .tagline{
+    position:relative;
+    margin-top:.3rem;
+    font-size:.85rem;
+    color:var(--olive);
+  }
+
+  /* ===== Input panel ===== */
+  .console{
+    max-width:760px;
+    margin:2rem auto 0;
+    padding:0 1.2rem;
+  }
+  .console-card{
+    background:var(--paper-deep);
+    border:1.5px solid var(--line);
+    border-radius:14px;
+    padding:1.3rem 1.3rem 1.5rem;
+    box-shadow:0 2px 0 var(--line);
+  }
+  .console-card h2{
+    font-size:1.05rem;
+    color:var(--olive-deep);
+    margin-bottom:.35rem;
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .console-card h2 .num{
+    background:var(--clay);color:var(--paper);
+    font-size:.75rem;width:1.5rem;height:1.5rem;
+    display:grid;place-items:center;border-radius:50%;
+    font-family:Georgia,serif;
+  }
+  .console-card p.hint{font-size:.83rem;color:var(--mute);margin-bottom:.7rem}
+  textarea{
+    width:100%;min-height:96px;resize:vertical;
+    font-family:"Amiri",serif;font-size:1.15rem;
+    direction:rtl;
+    padding:.8rem .9rem;
+    border:1.5px solid var(--line);
+    border-radius:10px;background:var(--paper);
+    color:var(--ink);
+  }
+  textarea:focus{outline:2px solid var(--olive);border-color:var(--olive)}
+  .row{display:flex;gap:.7rem;margin-top:.8rem;flex-wrap:wrap;align-items:center}
+  button.go{
+    font-family:inherit;font-size:1rem;font-weight:600;
+    background:var(--olive);color:var(--paper);
+    border:none;border-radius:10px;
+    padding:.65rem 1.4rem;cursor:pointer;
+    box-shadow:0 2px 0 var(--olive-deep);
+    transition:transform .08s,background .15s;
+  }
+  button.go:hover{background:var(--olive-deep)}
+  button.go:active{transform:translateY(2px);box-shadow:none}
+  button.ghost{
+    font-family:inherit;font-size:.9rem;
+    background:transparent;color:var(--clay);
+    border:1.5px solid var(--clay-soft);border-radius:10px;
+    padding:.55rem 1rem;cursor:pointer;
+  }
+  button.ghost:hover{background:rgba(180,80,47,.08)}
+  .count{font-size:.83rem;color:var(--mute);margin-inline-start:auto}
+
+  /* ===== Cards ===== */
+  .deck{
+    max-width:760px;margin:2.4rem auto 0;
+    padding:0 1.2rem;
+    display:flex;flex-direction:column;gap:1.6rem;
+  }
+  .word-card{
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 3px 0 var(--line);
+    animation:rise .4s ease both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .wc-head{
+    background:linear-gradient(120deg,var(--olive-deep),var(--olive));
+    color:var(--paper);
+    padding:1.1rem 1.3rem;
+    display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+    transition:filter .25s ease;
+  }
+  .wc-ar{
+    font-family:"Amiri","Scheherazade New",serif;
+    direction:rtl;font-size:2.7rem;line-height:1;
+  }
+  .wc-translit{
+    font-size:1.5rem;color:#f3e9d2;direction:rtl;font-weight:600;
+  }
+  /* flip-direction toolbar */
+  .wc-tools{
+    display:flex;gap:.5rem;align-items:center;
+    padding:.7rem 1.3rem;
+    background:var(--paper-deep);
+    border-bottom:1.5px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .flip-btn,.reveal-btn{
+    font-family:inherit;font-weight:600;cursor:pointer;
+    border:none;border-radius:20px;display:flex;align-items:center;gap:.4rem;
+  }
+  .reveal-btn{
+    font-size:.85rem;background:var(--clay);color:var(--paper);
+    padding:.45rem 1rem;box-shadow:0 2px 0 #8c3c22;
+  }
+  .reveal-btn.open{background:var(--mute);box-shadow:0 2px 0 #5a5040}
+  .flip-btn{
+    font-size:.8rem;background:transparent;color:var(--olive-deep);
+    border:1.5px solid var(--olive);padding:.4rem .85rem;
+    margin-inline-start:auto;
+  }
+  .flip-btn:hover{background:rgba(91,110,58,.1)}
+  .reveal-btn .eye{font-size:1rem}
+  .mode-tag{font-size:.78rem;color:var(--mute);letter-spacing:.03em}
+
+  /* HIDING LOGIC
+     DEFAULT (ar2he): prompt = head (ערבית+תעתיק) visible.
+        hidden until reveal: trans-row (תרגום) + body.
+     FLIPPED (he2ar): prompt = trans-row (תרגום) visible.
+        hidden until reveal: head (ערבית+תעתיק) + body. */
+  .wc-head, .wc-trans-row, .wc-body{ transition:filter .25s ease; }
+
+  /* default mode: blur translation + body until revealed */
+  .word-card:not(.flipped):not(.revealed) .wc-trans-row,
+  .word-card:not(.flipped):not(.revealed) .wc-body{ filter:blur(9px); }
+
+  /* flipped mode: blur the Arabic head + body until revealed */
+  .word-card.flipped:not(.revealed) .wc-head,
+  .word-card.flipped:not(.revealed) .wc-body{ filter:blur(9px); }
+
+  /* the illustration is part of the ANSWER in both directions — hide it until revealed */
+  .wc-illus{position:relative}
+  .word-card:not(.revealed) .wc-illus > *{ opacity:0; }
+  .word-card:not(.revealed) .wc-illus::after{
+    content:"؟";position:absolute;inset:0;display:grid;place-items:center;
+    font-family:"Amiri",serif;font-size:2.2rem;color:var(--mute);z-index:2;
+  }
+  .wc-illus > *{transition:opacity .25s ease}
+
+  .wc-trans-row{
+    direction:rtl;padding:.9rem 1.3rem .4rem;
+    font-size:1.5rem;color:var(--olive-deep);font-weight:700;
+  }
+  .wc-trans-row .lbl{font-size:.75rem;color:var(--mute);font-weight:400;display:block;margin-bottom:.15rem}
+
+  .wc-head{position:relative}
+  .wc-body{padding:1.1rem 1.3rem 1.4rem}
+  .block{margin-bottom:1.05rem}
+  .block:last-child{margin-bottom:0}
+  .label{
+    display:inline-flex;align-items:center;gap:.4rem;
+    font-size:.78rem;letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--clay);font-weight:700;
+    margin-bottom:.35rem;
+  }
+  .label::before{content:"";width:.55rem;height:.55rem;
+    background:var(--gold);transform:rotate(45deg);display:inline-block}
+  .block p{font-size:1.02rem}
+  .morph{
+    display:flex;flex-wrap:wrap;gap:.5rem;
+  }
+  .chip{
+    font-family:"Amiri",serif;direction:rtl;
+    background:var(--paper-deep);border:1px solid var(--line);
+    border-radius:8px;padding:.3rem .7rem;font-size:1rem;
+  }
+  .chip b{color:var(--clay);font-weight:700}
+  /* morphology chips: arabic + transliteration stacked, affixes colored */
+  .mchip{
+    background:var(--paper-deep);border:1px solid var(--line);
+    border-radius:10px;padding:.5rem .7rem;direction:rtl;
+    min-width:130px;
+  }
+  .mchip .m-ar{font-family:"Amiri",serif;font-size:1.45rem;line-height:1.2}
+  .mchip .m-tl{font-size:1.05rem;color:var(--ink);font-weight:600;margin-top:.1rem}
+  .mchip .m-note{font-size:.82rem;color:var(--mute);margin-top:.25rem;line-height:1.4}
+  /* affix markers */
+  .pre{color:#2f7d8c;font-weight:700}   /* תחילית */
+  .suf{color:#a8447e;font-weight:700}   /* סופית */
+  .root-m{color:var(--ink)}             /* שורש/גזע */
+  .affix-key{
+    display:flex;gap:.9rem;flex-wrap:wrap;
+    font-size:.78rem;color:var(--mute);margin-bottom:.5rem;direction:rtl;
+  }
+  .affix-key span{display:inline-flex;align-items:center;gap:.3rem}
+  .affix-key i{width:.7rem;height:.7rem;border-radius:2px;display:inline-block}
+  /* small word illustration */
+  .wc-illus{
+    flex:0 0 auto;width:88px;height:88px;
+    background:var(--paper);border:1.5px solid rgba(255,255,255,.5);
+    border-radius:14px;display:grid;place-items:center;
+    margin-inline-start:auto;overflow:hidden;
+  }
+  .wc-illus img{width:100%;height:100%;object-fit:cover;display:block}
+  .wc-illus .illus-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+  .illus-emoji{font-size:3rem;line-height:1}
+  /* text-to-speech speaker buttons */
+  .spk{
+    border:none;background:rgba(255,255,255,.18);color:var(--paper);
+    width:2rem;height:2rem;border-radius:50%;cursor:pointer;
+    font-size:1rem;display:inline-grid;place-items:center;
+    transition:background .15s,transform .08s;flex:0 0 auto;
+  }
+  .spk:hover{background:rgba(255,255,255,.34)}
+  .spk:active{transform:scale(.9)}
+  .spk.speaking{background:var(--gold);color:var(--ink);animation:pulse .8s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(199,154,58,.6)}50%{box-shadow:0 0 0 6px rgba(199,154,58,0)}}
+  .spk-sm{
+    background:var(--olive);color:var(--paper);
+    width:1.7rem;height:1.7rem;font-size:.85rem;box-shadow:none;
+  }
+  .spk-sm:hover{background:var(--olive-deep)}
+  .ex-head{display:flex;align-items:center;gap:.5rem}
+  .ex-head .ar{flex:1}
+  .tts-warn{
+    font-size:.78rem;color:var(--clay);margin-top:.3rem;direction:rtl;display:none;
+  }
+  .examples li{
+    list-style:none;direction:rtl;
+    padding:.5rem .8rem;margin-bottom:.45rem;
+    background:var(--paper-deep);border-radius:9px;
+    border-inline-start:3px solid var(--olive);
+  }
+  .examples .ar{font-family:"Amiri",serif;font-size:1.25rem}
+  .examples .tl{color:var(--mute);font-size:.95rem}
+  .examples .he{font-size:.98rem}
+  .curio{
+    background:rgba(199,154,58,.12);
+    border:1px dashed var(--gold);
+    border-radius:10px;padding:.7rem .9rem;
+    font-size:.98rem;
+  }
+  .curio .label{color:var(--olive-deep)}
+  .curio .label::before{background:var(--clay)}
+  .related .chip{cursor:default}
+  .related .chip small{color:var(--mute);display:block;font-size:.8rem;direction:rtl}
+
+  .empty{
+    text-align:center;color:var(--mute);
+    padding:3rem 1rem;font-size:1.05rem;
+  }
+  .empty .big{font-family:"Amiri",serif;font-size:3rem;color:var(--line);display:block;margin-bottom:.5rem}
+
+  footer{
+    max-width:760px;margin:3rem auto 0;padding:1rem 1.2rem 0;
+    text-align:center;color:var(--mute);font-size:.82rem;
+    border-top:1px solid var(--line);
+  }
+
+  /* ===== Review (shinun) mode ===== */
+  .review-launch{margin-top:.9rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+  button.review-go{
+    font-family:inherit;font-size:1rem;font-weight:700;
+    background:var(--clay);color:var(--paper);
+    border:none;border-radius:10px;padding:.65rem 1.4rem;cursor:pointer;
+    box-shadow:0 2px 0 #8c3c22;display:flex;align-items:center;gap:.5rem;
+  }
+  button.review-go:hover{background:#9d4327}
+  button.review-go:active{transform:translateY(2px);box-shadow:none}
+  button.review-go:disabled{background:var(--line);color:var(--mute);box-shadow:none;cursor:not-allowed}
+
+  .review-overlay{
+    position:fixed;inset:0;z-index:50;display:none;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(91,110,58,.12), transparent 55%),
+      var(--paper);
+    overflow-y:auto;padding:1.2rem;
+  }
+  .review-overlay.on{display:block}
+  body.review-active{overflow:hidden}
+  .rv-wrap{max-width:620px;margin:0 auto}
+  .rv-top{
+    display:flex;align-items:center;gap:1rem;
+    padding:.4rem 0 1rem;direction:rtl;
+  }
+  .rv-close{
+    border:none;background:var(--paper-deep);color:var(--ink);
+    width:2.4rem;height:2.4rem;border-radius:50%;font-size:1.2rem;cursor:pointer;
+    border:1.5px solid var(--line);
+  }
+  .rv-close:hover{background:var(--line)}
+  .rv-progress-wrap{flex:1}
+  .rv-progress-track{height:.7rem;background:var(--paper-deep);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+  .rv-progress-fill{height:100%;background:linear-gradient(90deg,var(--olive),var(--gold));width:0;transition:width .3s ease}
+  .rv-stats{font-size:.82rem;color:var(--mute);margin-top:.35rem;direction:rtl;display:flex;gap:1rem}
+  .rv-stats b{color:var(--olive-deep)}
+
+  .rv-card-slot{margin-top:.5rem;animation:rise .35s ease both}
+  /* recall buttons — sticky at top so no scrolling needed when you know it */
+  .rv-actions{
+    display:flex;gap:.8rem;margin:0 0 .6rem;
+    position:sticky;top:.4rem;z-index:5;
+    background:var(--paper);padding:.3rem 0;border-radius:14px;
+  }
+  .rv-actions button{
+    flex:1;font-family:inherit;font-size:1.05rem;font-weight:700;
+    padding:.85rem 1rem;border:none;border-radius:14px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:.2rem;
+    transition:transform .08s;
+  }
+  .rv-actions button:active{transform:translateY(2px)}
+  .rv-actions button small{font-size:.75rem;font-weight:400;opacity:.85}
+  .rv-yes{background:var(--olive);color:var(--paper);box-shadow:0 3px 0 var(--olive-deep)}
+  .rv-yes:hover{background:var(--olive-deep)}
+  .rv-no{background:#c2683f;color:var(--paper);box-shadow:0 3px 0 #8c3c22}
+  .rv-no:hover{background:#a8542e}
+  .rv-actions.hidden{display:none}
+  .rv-reveal-hint{
+    text-align:center;color:var(--mute);font-size:.85rem;margin:0 0 .8rem;direction:rtl;
+  }
+
+  /* summary */
+  .rv-summary{text-align:center;direction:rtl;padding:2rem 1rem;animation:rise .4s ease both}
+  .rv-summary .big-num{font-family:"Amiri",serif;font-size:4rem;color:var(--olive);line-height:1}
+  .rv-summary h3{font-size:1.5rem;color:var(--olive-deep);margin:.3rem 0 1rem}
+  .rv-summary .line{color:var(--mute);margin-bottom:.4rem}
+  .rv-summary .line b{color:var(--ink)}
+  .rv-hard{
+    margin-top:1.2rem;text-align:right;
+    background:var(--paper-deep);border:1px solid var(--line);
+    border-radius:12px;padding:.9rem 1rem;
+  }
+  .rv-hard .label{margin-bottom:.5rem}
+  .rv-hard ul{list-style:none}
+  .rv-hard li{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:.4rem 0;border-bottom:1px dashed var(--line);direction:rtl;
+  }
+  .rv-hard li:last-child{border-bottom:none}
+  .rv-hard .hw{font-family:"Amiri",serif;font-size:1.3rem}
+  .rv-hard .tries{font-size:.82rem;color:var(--clay);font-weight:700}
+  .rv-summary-actions{display:flex;gap:.7rem;justify-content:center;margin-top:1.4rem;flex-wrap:wrap}
+  .rv-summary-actions button{
+    font-family:inherit;font-size:.95rem;font-weight:600;padding:.7rem 1.3rem;
+    border-radius:10px;cursor:pointer;border:none;
+  }
+  .rv-again{background:var(--clay);color:var(--paper);box-shadow:0 2px 0 #8c3c22}
+  .rv-done{background:var(--olive);color:var(--paper);box-shadow:0 2px 0 var(--olive-deep)}
+  /* inside review the card auto-fits */
+  .review-overlay .word-card{box-shadow:0 3px 0 var(--line)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span>ب</span><span class="vowel">َ</span>سْم<span class="vowel">َ</span>ة</div>
+  <div class="subtitle">בַּסְמַה · אוצר המילים שלי</div>
+  <div class="tagline">ערבית פלסטינית־לבנטינית · תעתיק עברי, הטיות וזיכרון</div>
+</header>
+
+<section class="console">
+  <div class="console-card">
+    <h2><span class="num">1</span> מילים ללמוד</h2>
+    <p class="hint">הדבק כאן מילים בערבית — אחת בכל שורה, או מופרדות בפסיק. אפשר גם בפורמט <span dir="rtl" style="font-family:Amiri">كلمة, תעתיק, תרגום</span>. לחץ "בנה כרטיסים".</p>
+    <textarea id="input" placeholder="مثال:&#10;صحن&#10;دوّر على&#10;طلع"></textarea>
+    <div class="row">
+      <button class="go" onclick="build()">בנה כרטיסים</button>
+      <button class="ghost" onclick="clearAll()">נקה</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="review-launch">
+      <button class="review-go" id="reviewBtn" onclick="startReview()" disabled>
+        🎴 <span>התחל שינון</span>
+      </button>
+      <span class="count" style="margin:0">עוברים על כל המילים בערבוב עד שתזכור את כולן</span>
+    </div>
+  </div>
+</section>
+
+<section class="deck" id="deck">
+  <div class="empty">
+    <span class="big">ابدأ</span>
+    הדבק מילים למעלה כדי לבנות את ערכת הלימוד שלך.
+  </div>
+</section>
+
+<div class="review-overlay" id="reviewOverlay">
+  <div class="rv-wrap">
+    <div class="rv-top">
+      <button class="rv-close" onclick="endReview()" title="צא">✕</button>
+      <div class="rv-progress-wrap">
+        <div class="rv-progress-track"><div class="rv-progress-fill" id="rvFill"></div></div>
+        <div class="rv-stats">
+          <span>נותרו: <b id="rvLeft">0</b></span>
+          <span>זכרת: <b id="rvDone">0</b></span>
+          <span>סיבוב: <b id="rvRound">1</b></span>
+        </div>
+      </div>
+    </div>
+    <div id="rvBody"></div>
+  </div>
+</div>
+
+<footer>
+  כל כרטיס: תרגום · ניתוח תחיליות וסופיות (גוף/זמן) · דוגמאות בהטיות · קוריוז על השורש · מילים קרובות.
+</footer>
+
+<script>
+/* =========================================================
+   הגדרת תיקיית התמונות
+   שמור תמונות אמיתיות בתיקייה בשם זה, ליד קובץ ה-HTML.
+   לכל מילה: הוסף שדה  pic:"שם-קובץ.jpg"  במאגר.
+   אם הקובץ לא קיים — מוצג האמוג'י (שדה emoji) במקום, בלי שגיאה.
+   ========================================================= */
+const IMG_DIR = "images/";
+
+/* =========================================================
+   מאגר המילים — LEXICON
+   זה המודול שאני (Claude) ממלא עבורך מתוך הקלט שתיתן.
+   כל ערך = מילה אחת עם כל המידע ללמידה.
+   כדי להוסיף מילים: תן לי קוצץ חדש ואני אחזיר את הבלוק הזה מעודכן.
+   ========================================================= */
+const LEXICON = {
+  "صحن": {
+    translit:"צַחְן", trans:"צלחת",
+    pic:"sahn.jpg", emoji:"🍽️",
+    morph:[
+      {ar:"صحن", tl:'<span class="root-m">צַחְן</span>', note:"שם עצם, זכר יחיד (הבסיס)"},
+      {ar:"صحون", tl:'<span class="root-m">צֻח</span><span class="suf">וּן</span>', note:'סופית <span class="suf">וּן־</span> = ריבוי → צלחות'},
+      {ar:"صحني", tl:'<span class="root-m">צַחְנ</span><span class="suf">ִי</span>', note:'סופית <span class="suf">ִי־</span> = שייכות גוף 1 → הצלחת שלי'}
+    ],
+    examples:[
+      {ar:"حُطّ الأكل بالصحن", tl:"חֻטّ אל-אַכֵּל בִּצַّחְן", he:"שים את האוכל בצלחת"},
+      {ar:"صحني وسخ", tl:"צַחְנִי וִסֵח'", he:"הצלחת שלי מלוכלכת"}
+    ],
+    curio:"קל לזכור: 'צלחת' ו'צחן' שניהם מתחילים בצליל צ' ומסתיימים בעיצור קשה — <b>צ___ן</b>.",
+    related:[
+      {ar:"طبق", tl:"טַבַּק", he:"צלחת (נרדף, פחות מדובר)"},
+      {ar:"صينية", tl:"צִינִיֵّה", he:"מגש — אותו שדה משמעות"}
+    ]
+  },
+
+  "مخلل": {
+    translit:"מְחַ'לַّל", trans:"חמוצים",
+    emoji:"🥒",
+    morph:[
+      {ar:"مخلّل", tl:'<span class="root-m">מְחַ\'לַّל</span>', note:"שם פעול (مفعّل) מהשורש خ-ل-ل = 'מה שהוחמץ'"},
+      {ar:"مخلّلات", tl:'<span class="root-m">מְחַ\'לַّל</span><span class="suf">ַאת</span>', note:'סופית <span class="suf">ַאת־</span> = ריבוי נקבה → סוגי חמוצים'},
+      {ar:"خلّل", tl:'<span class="root-m">חַ\'לַّל</span>', note:"הפועל המקורי: 'החמיץ / כבש בחומץ'"}
+    ],
+    examples:[
+      {ar:"بحبّ المخلّل مع الفلافل", tl:"בַּחֵבּّ אל-מְחַ'לַّל מַע אל-פַלַאפֵל", he:"אני אוהב חמוצים עם פלאפל"},
+      {ar:"المخلّل حامض كتير", tl:"אל-מְחַ'לַّל חַאמֵד כְּתִיר", he:"החמוצים מאוד חמוצים"}
+    ],
+    curio:"השורש خ-ل-ل קשור ל'חומץ' (خلّ — חַ'לّ). אותו צליל כמו 'חל' — חושב על משהו ש<b>חולל</b> שינוי בירק והפך אותו לחמוץ.",
+    related:[
+      {ar:"خلّ", tl:"חַ'לّ", he:"חומץ — שורש המילה"},
+      {ar:"كبيس", tl:"כַּבִּיס", he:"כבוש (נרדף לחמוצים)"}
+    ]
+  },
+
+  "بقدونس": {
+    translit:"בַקְדוֹנַס", trans:"פטרוזיליה",
+    emoji:"🌿",
+    morph:[
+      {ar:"بقدونس", tl:'<span class="root-m">בַקְדוֹנַס</span>', note:"שם עצם — מילה שאינה משורש שמי קלאסי (יוונית: petroselinon)"}
+    ],
+    examples:[
+      {ar:"حُطّ بقدونس عالسلطة", tl:"חֻטّ בַקְדוֹנַס עַ-(ל)סַّלַטַה", he:"שים פטרוזיליה על הסלט"},
+      {ar:"التبّولة فيها بقدونس كتير", tl:"א(ל)תַّבּוּלֵה פִיהַא בַקְדוֹנַס כְּתִיר", he:"בטבולה יש הרבה פטרוזיליה"}
+    ],
+    curio:"המילה משותפת לעברית ('פטרוזיליה') וערבית — שתיהן הגיעו מ<u>יוונית</u>. אם תזכור ש'בַקְדוֹנַס' זו מילה זרה, יהיה קל יותר.",
+    related:[
+      {ar:"كزبرة", tl:"כֻּזְבַּרַה", he:"כוסברה — עשב דומה במטבח"},
+      {ar:"نعنع", tl:"נַעְנַע", he:"נענע — עשב תיבול נוסף"}
+    ]
+  },
+
+  "حبة": {
+    translit:"חַבֵּّה", trans:"כדור (פלאפל, למשל)",
+    emoji:"🧆",
+    morph:[
+      {ar:"حبّة", tl:'<span class="root-m">חַבֵּّ</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> (ة) = יחידה אחת → גרגר/כדור בודד'},
+      {ar:"حبّات", tl:'<span class="root-m">חַבֵּّ</span><span class="suf">ַאת</span>', note:'סופית <span class="suf">ַאת־</span> = ריבוי → כמה כדורים'},
+      {ar:"حبّتين", tl:'<span class="root-m">חַבֵּّ</span><span class="suf">תֵין</span>', note:'סופית <span class="suf">תֵין־</span> = זוגי → שני כדורים'}
+    ],
+    examples:[
+      {ar:"بدّي حبّة فلافل", tl:"בִּדִّי חַבֵّה פַלַאפֵל", he:"אני רוצה כדור פלאפל"},
+      {ar:"كُل حبّتين بس", tl:"כֻּל חַבֵّתֵין בַּס", he:"אכול רק שני כדורים"}
+    ],
+    curio:"حبّة (חַבֵّה) = 'גרגר/זרע/כדור' — אותו שורש ح-ب-ب כמו <b>حبّ</b> (חַבּّ — אהבה!). תחשוב: כל גרגר קטן ואהוב. גם 'גלולה' היא حبّة (חַבֵّה).",
+    related:[
+      {ar:"حبوب", tl:"חֻבּוּבּ", he:"גרגרים/דגנים/גלולות (ריבוי)"},
+      {ar:"قرص", tl:"קֻרְץ", he:"דיסקית/טבלייה — צורה דומה"}
+    ]
+  },
+
+  "حُط": {
+    translit:"חֻטّ", trans:"שים",
+    emoji:"✋",
+    morph:[
+      {ar:"حُطّ", tl:'<span class="root-m">חֻטّ</span>', note:"ציווי, גוף 2 ז' יחיד: 'שים!' (מהשורש ح-ط-ط)"},
+      {ar:"حطّيت", tl:'<span class="root-m">חַטّ</span><span class="suf">ֵית</span>', note:'סופית <span class="suf">ֵית־</span> = עבר גוף 1 → שמתי'},
+      {ar:"بحُطّ", tl:'<span class="pre">בְּ</span><span class="root-m">חֻטّ</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → אני שם'},
+      {ar:"حُطّي", tl:'<span class="root-m">חֻטّ</span><span class="suf">ִי</span>', note:'סופית <span class="suf">ִי־</span> = ציווי לנקבה → שימי!'}
+    ],
+    examples:[
+      {ar:"حُطّ الكتاب عالطاولة", tl:"חֻטّ אל-כְּתַאבּ עַ-(ל)טַّאוְלֵה", he:"שים את הספר על השולחן"},
+      {ar:"حطّيت السكّر بالقهوة", tl:"חַטֵّית א(ל)סֻّכַّר בִּל-קַהְוֵה", he:"שמתי את הסוכר בקפה"}
+    ],
+    curio:"השורש ح-ط-ط = 'להוריד/להניח' (גם 'محطّة' — מַחַטַّה — תחנה, מקום שבו <u>מניחים/עוצרים</u>). פועל יומיומי מאוד במטבח ובכלל.",
+    related:[
+      {ar:"محطة", tl:"מַחַטַّה", he:"תחנה — אותו שורש (מקום הנחה)"},
+      {ar:"وضع", tl:"וַדַֿע", he:"הניח/שם (נרדף ספרותי יותר)"}
+    ]
+  },
+
+  "بدون": {
+    translit:"בִּדוֹן", trans:"בלי",
+    emoji:"🚫",
+    morph:[
+      {ar:"بدون", tl:'<span class="root-m">בִּדוֹן</span>', note:"מילת יחס: 'בלי / ללא' (בא לפני שם עצם)"},
+      {ar:"بدوني", tl:'<span class="root-m">בִּדוֹנ</span><span class="suf">ִי</span>', note:'סופית <span class="suf">ִי־</span> = גוף 1 → בלעדיי'},
+      {ar:"بدونك", tl:'<span class="root-m">בִּדוֹנ</span><span class="suf">ַכּ</span>', note:'סופית <span class="suf">ַכּ־</span> = גוף 2 → בלעדיך'}
+    ],
+    examples:[
+      {ar:"قهوة بدون سكّر", tl:"קַהְוֵה בִּדוֹן סֻכַّר", he:"קפה בלי סוכר"},
+      {ar:"ما بقدر أعيش بدونك", tl:"מַא בַּקְדַר אַעִיש בִּדוֹנַכּ", he:"לא אוכל לחיות בלעדיך"}
+    ],
+    curio:"<b>بدون</b> (בִּדוֹן) = ההפך מ<b>مع</b> (מַע — עם). שים לב לדמיון ל'بدّ' (בִּדّ — רצון) — אבל לא קשור. פשוט תזכור: 'בִּדוֹן' = בלי. (במקרה דומה לעברית 'בידוד' — להיות בלי אחרים).",
+    related:[
+      {ar:"مع", tl:"מַע", he:"עם — ההפך"},
+      {ar:"من غير", tl:"מִן עֵ'יר", he:"בלי (נרדף מדובר)"}
+    ]
+  },
+
+  "فحص": {
+    translit:"פַחַץ", trans:"בדק",
+    emoji:"🔬",
+    morph:[
+      {ar:"فحص", tl:'<span class="root-m">פַחַץ</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא בדק' (הבסיס)"},
+      {ar:"بفحص", tl:'<span class="pre">בִּ</span><span class="root-m">פְחַץ</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → בודק'},
+      {ar:"فحصت", tl:'<span class="root-m">פַחַצ</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1/2 → בדקתי / בדקת'},
+      {ar:"إفحص", tl:'<span class="pre">אִ</span><span class="root-m">פְחַץ</span>', note:'תחילית <span class="pre">אִ־</span> = ציווי → בדוק!'}
+    ],
+    examples:[
+      {ar:"الدكتور فحص المريض", tl:"א(ל)דֻّכְּתוֹר פַחַץ אל-מַרִיד", he:"הרופא בדק את החולה"},
+      {ar:"بدّي افحص السيّارة", tl:"בִּדִّי אַפְחַץ א(ל)סַّיַّארַה", he:"אני רוצה לבדוק את המכונית"}
+    ],
+    curio:"השורש ف-ح-ص = בדיקה יסודית. 'فحص طبّي' (פַחַץ טִבִّّי) = בדיקה רפואית. תחשוב: לבדוק = לפחוס פנימה ולחפש מה יש שם.",
+    related:[
+      {ar:"دقّق", tl:"דַקַّק", he:"דייק/בדק בקפדנות"},
+      {ar:"تأكّد", tl:"תְאַכַّד", he:"וידא"}
+    ]
+  },
+
+  "إرتاح": {
+    translit:"אִרְתַאח", trans:"נח",
+    emoji:"😌",
+    morph:[
+      {ar:"إرتاح", tl:'<span class="pre">אִ</span><span class="root-m">רְתַאח</span>', note:"בניין VIII (إفتعل) — עבר: 'הוא נח / נרגע'"},
+      {ar:"بيرتاح", tl:'<span class="pre">בִּי</span><span class="root-m">רְתַאח</span>', note:'תחילית <span class="pre">בִּי־</span> = הווה גוף 3 → הוא נח'},
+      {ar:"إرتحت", tl:'<span class="pre">אִ</span><span class="root-m">רְתַח</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → נחתי / נרגעתי'},
+      {ar:"إرتاح!", tl:'<span class="pre">אִ</span><span class="root-m">רְתַאח</span>', note:"ציווי: 'תנוח! / תירגע!'"}
+    ],
+    examples:[
+      {ar:"إرتاح شوي، تعبان", tl:"אִרְתַאח שְוַי, תַעְבַּאן", he:"תנוח קצת, אתה עייף"},
+      {ar:"إرتحت بعد الشغل", tl:"אִרְתַחְת בַּעְד א(ל)שֻّעֵ'ל", he:"נחתי אחרי העבודה"}
+    ],
+    curio:"מהשורש ر-و-ح (רוח/נשמה). אותו שורש כמו <b>راح</b> (רַאח — הלך) ו<b>روح</b> (רוּח — נפש). לנוח = להחזיר את הרוח לגוף. דומה לעברית 'רוח' ו'מרגוע'.",
+    related:[
+      {ar:"راحة", tl:"רַאחַה", he:"מנוחה (שם עצם)"},
+      {ar:"نام", tl:"נַאם", he:"ישן — מנוחה עמוקה יותר"}
+    ]
+  },
+
+  "قرر": {
+    translit:"קַרַّר", trans:"החליט",
+    emoji:"✅",
+    morph:[
+      {ar:"قرّر", tl:'<span class="root-m">קַרַّר</span>', note:"בניין II — עבר, גוף 3 ז': 'הוא החליט' (הבסיס)"},
+      {ar:"بقرّر", tl:'<span class="pre">בִּ</span><span class="root-m">קַרֵّר</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → מחליט'},
+      {ar:"قرّرت", tl:'<span class="root-m">קַרַّר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → החלטתי'},
+      {ar:"قرّروا", tl:'<span class="root-m">קַרַّר</span><span class="suf">וּ</span>', note:'סופית <span class="suf">וּ־</span> = ריבוי → הם החליטו'}
+    ],
+    examples:[
+      {ar:"قرّرت أسافر", tl:"קַרַّרְת אַסַאפֵר", he:"החלטתי לנסוע"},
+      {ar:"شو قرّرتوا؟", tl:"שוּ קַרַّרְתוּ?", he:"מה החלטתם?"}
+    ],
+    curio:"השורש ق-ر-ر = 'יציבות/קביעות' (مستقر — מֻסְתַקֵרّ — יציב). להחליט = לקבע משהו במקומו. 'قرار' (קַרַאר) = החלטה. דומה לרעיון העברי 'קבע'.",
+    related:[
+      {ar:"قرار", tl:"קַרַאר", he:"החלטה (שם עצם)"},
+      {ar:"حسم", tl:"חַסַם", he:"הכריע/סגר עניין"}
+    ]
+  },
+
+  "زينة": {
+    translit:"זִינֵה", trans:"קישוטים",
+    emoji:"🎀",
+    morph:[
+      {ar:"زينة", tl:'<span class="root-m">זִינֵ</span><span class="suf">ה</span>', note:"שם עצם נקבה מהשורש ز-י-ن = 'יופי/קישוט'"},
+      {ar:"زيّن", tl:'<span class="root-m">זַיַّן</span>', note:"הפועל: 'קישט / ייפה'"},
+      {ar:"مزيّن", tl:'<span class="pre">מְ</span><span class="root-m">זַיַّן</span>', note:'תחילית <span class="pre">מְ־</span> = שם פעול → מקושט'}
+    ],
+    examples:[
+      {ar:"حطّينا زينة عالعيد", tl:"חַטֵّינַא זִינֵה עַ-(ל)עִיד", he:"שמנו קישוטים לחג"},
+      {ar:"البيت مزيّن حلو", tl:"אל-בֵּית מְזַיַّן חֵלוּ", he:"הבית מקושט יפה"}
+    ],
+    curio:"השורש ز-ي-ن = יופי וקישוט. שם נפוץ לבנות הוא 'زين/زينة' (זֵין/זִינֵה). תחשוב: זִינֵה = משהו שמוסיף <u>חן</u> ('זין' נשמע קצת כמו 'חן' הפוך).",
+    related:[
+      {ar:"زيّن", tl:"זַיַّן", he:"קישט (הפועל)"},
+      {ar:"ديكور", tl:"דֵיכּוֹר", he:"דקורציה (מילה שאולה)"}
+    ]
+  },
+
+  "غدا": {
+    translit:"עַ'דַא", trans:"ארוחת צהריים",
+    emoji:"🍲",
+    morph:[
+      {ar:"غدا", tl:'<span class="root-m">עַ\'דַא</span>', note:"שם עצם: 'ארוחת צהריים' (הארוחה המרכזית)"},
+      {ar:"غداء", tl:'<span class="root-m">עַ\'דַאא\'</span>', note:"צורה ספרותית של אותה מילה"},
+      {ar:"تغدّى", tl:'<span class="pre">תְ</span><span class="root-m">עַ\'דַّא</span>', note:'תחילית <span class="pre">תְ־</span> = הפועל → אכל צהריים'}
+    ],
+    examples:[
+      {ar:"شو في عالغدا؟", tl:"שוּ פִי עַ-(ל)עַ'דַא?", he:"מה יש לארוחת צהריים?"},
+      {ar:"تغدّينا مع العيلة", tl:"תְעַ'דֵّינַא מַע אל-עֵילֵה", he:"אכלנו צהריים עם המשפחה"}
+    ],
+    curio:"שים לב להבדל: <b>غدا</b> (עַ'דַא) = צהריים, אבל <b>غدًا</b> (עַ'דַן) = 'מחר'! מאותו שורש — מחר זה היום שבו תאכל את הצהריים הבאה.",
+    related:[
+      {ar:"فطور", tl:"פְטוּר", he:"ארוחת בוקר"},
+      {ar:"عشا", tl:"עַשַא", he:"ארוחת ערב"}
+    ]
+  },
+
+  "لمّا": {
+    translit:"לַמַّא", trans:"כש־",
+    emoji:"⏳",
+    morph:[
+      {ar:"لمّا", tl:'<span class="root-m">לַמַّא</span>', note:"מילת קישור: 'כאשר / כש־' (לפעולה בעבר או הרגל)"}
+    ],
+    examples:[
+      {ar:"لمّا وصلت، كان نايم", tl:"לַמַّא וִצֵלְת, כַּאן נַאיֵם", he:"כשהגעתי, הוא היה ישן"},
+      {ar:"بفرح لمّا بشوفك", tl:"בַּפְרַח לַמַّא בְּשוּפַכּ", he:"אני שמח כשאני רואה אותך"}
+    ],
+    curio:"<b>لمّا</b> (לַמַّא) שונה מ-<b>إذا</b> (אִזַא — אם): 'לַמַّא' = כש (ודאי שיקרה/קרה), 'إذا' = אם (תנאי). תזכור: לַמַّא נשמע כמו 'למה' אבל זה 'כשַ'.",
+    related:[
+      {ar:"وقت ما", tl:"וַקֵת מַא", he:"בזמן ש (נרדף)"},
+      {ar:"إذا", tl:"אִזַא", he:"אם — תנאי, לא ודאות"}
+    ]
+  },
+
+  "طفى": {
+    translit:"טַפַא", trans:"כיבה",
+    emoji:"🔌",
+    morph:[
+      {ar:"طفى", tl:'<span class="root-m">טַפַא</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא כיבה' (הבסיס)"},
+      {ar:"بطفي", tl:'<span class="pre">בִּ</span><span class="root-m">טְפִי</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → מכבה'},
+      {ar:"طفّيت", tl:'<span class="root-m">טַפّ</span><span class="suf">ֵית</span>', note:'סופית <span class="suf">ֵית־</span> = עבר גוף 1 → כיביתי'},
+      {ar:"إطفي", tl:'<span class="pre">אִ</span><span class="root-m">טְפִי</span>', note:'תחילית <span class="pre">אִ־</span> = ציווי → כבה!'}
+    ],
+    examples:[
+      {ar:"إطفي الضو", tl:"אִטְפִי א(ל)דֿّוّ", he:"כבה את האור"},
+      {ar:"طفّيت التلفزيون", tl:"טַפֵّית א(ל)תַّלַפַזְיוֹן", he:"כיביתי את הטלוויזיה"}
+    ],
+    curio:"השורש ط-ف-ي = כיבוי. ההפך מ<b>ولّع</b> (וַלַّע — הדליק). 'مطفأة' (מַטְפַאַה) = מטף כיבוי. תחשוב: לכבות = להפוך משהו ל<u>טפי</u> (כבוי/דועך).",
+    related:[
+      {ar:"ولّع", tl:"וַלַّע", he:"הדליק — ההפך"},
+      {ar:"سكّر", tl:"סַכַّר", he:"סגר (גם 'כיבה' מכשיר במדוברת)"}
+    ]
+  },
+
+  "ركض": {
+    translit:"רַכַּד", trans:"רץ",
+    emoji:"🏃",
+    morph:[
+      {ar:"ركض", tl:'<span class="root-m">רַכַּד</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא רץ' (הבסיס)"},
+      {ar:"بركض", tl:'<span class="pre">בִּ</span><span class="root-m">רְכֻּד</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → רץ'},
+      {ar:"ركضت", tl:'<span class="root-m">רַכַּד</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → רצתי'},
+      {ar:"بركضوا", tl:'<span class="pre">בִּ</span><span class="root-m">רְכֻּד</span><span class="suf">וּ</span>', note:'<span class="pre">בִּ־</span> הווה + <span class="suf">וּ־</span> רבים → הם רצים'}
+    ],
+    examples:[
+      {ar:"ركض عالباص", tl:"רַכַּד עַ-(ל)בַּאץ", he:"הוא רץ לאוטובוס"},
+      {ar:"الولاد عم بركضوا", tl:"אל-וְלַאד עַם בִּרְכֻּדוּ", he:"הילדים רצים (כרגע)"}
+    ],
+    curio:"השורש ر-ك-ض = ריצה. שונה מ<b>مشي</b> (מַשִי — הליכה). תחשוב: 'רַכַּד' — כשרצים <u>רוכבים</u> על הרגליים מהר.",
+    related:[
+      {ar:"مشي", tl:"מַשִי", he:"הליכה — איטי יותר"},
+      {ar:"هرب", tl:"הַרַבּ", he:"ברח — ריצה מסכנה"}
+    ]
+  },
+
+  "نقل": {
+    translit:"נַקַל", trans:"עבר / העביר",
+    emoji:"📦",
+    morph:[
+      {ar:"نقل", tl:'<span class="root-m">נַקַל</span>', note:"בניין I — עבר: 'הוא העביר / הזיז' (הבסיס)"},
+      {ar:"بنقل", tl:'<span class="pre">בּِ</span><span class="root-m">נְקֻל</span>', note:'תחילית <span class="pre">בּِ־</span> = הווה → מעביר'},
+      {ar:"نقلت", tl:'<span class="root-m">נַקַל</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → העברתי / עברתי'},
+      {ar:"إنتقل", tl:'<span class="pre">אִנְתַ</span><span class="root-m">קַל</span>', note:"בניין VIII: 'עבר דירה / עבר מקום'"}
+    ],
+    examples:[
+      {ar:"نقلت الأغراض عالبيت الجديد", tl:"נַקַלְת אל-אַעְ'רַאד עַ-(ל)בֵּית אל-גְ'דִיד", he:"העברתי את הדברים לבית החדש"},
+      {ar:"إنتقلنا عمحل جديد", tl:"אִנְתַקַלְנַא עַ-מַחַל גְ'דִיד", he:"עברנו למקום חדש"}
+    ],
+    curio:"השורש ن-ق-ل = העברה/תזוזה. 'مواصلات/نقل' (מֻוַאצַלַאת/נַקֵל) = תחבורה. 'منقل' (מַנְקַל) = ברזייה ניידת. תחשוב: לְנַקֵל = להעביר מנקודה לנקודה.",
+    related:[
+      {ar:"حوّل", tl:"חַוַّל", he:"העביר/המיר — דומה"},
+      {ar:"شال", tl:"שַאל", he:"הרים/לקח והזיז"}
+    ]
+  },
+
+  "تبّع": {
+    translit:"תַבַּע", trans:"של (שייכות)",
+    emoji:"🔗",
+    morph:[
+      {ar:"تبع", tl:'<span class="root-m">תַבַּע</span>', note:"מילת שייכות: 'של' (לפני בעלים) — تبعي = שלי"},
+      {ar:"تبعي", tl:'<span class="root-m">תַבַּע</span><span class="suf">ִי</span>', note:'סופית <span class="suf">ִי־</span> = גוף 1 → שלי'},
+      {ar:"تبعك", tl:'<span class="root-m">תַבַּע</span><span class="suf">ַכּ</span>', note:'סופית <span class="suf">ַכּ־</span> = גוף 2 → שלך'},
+      {ar:"تبعهن", tl:'<span class="root-m">תַבַּע</span><span class="suf">ְהֻן</span>', note:'סופית <span class="suf">ְהֻן־</span> = גוף 3 רבים → שלהם'}
+    ],
+    examples:[
+      {ar:"هاد الكتاب تبعي", tl:"הַאד אל-כְּתַאבּ תַבַּעִי", he:"הספר הזה שלי"},
+      {ar:"السيّارة تبعك حلوة", tl:"א(ל)סַّיַّארַה תַבַּעַכּ חֵלְוֵה", he:"המכונית שלך יפה"}
+    ],
+    curio:"מהשורש ت-ب-ع = 'לעקוב/להשתייך'. 'تابع' (תַאבֵּע) = כפוף/שייך. תחשוב: מה ש<u>עוקב</u> אחריך שייך לך. דרך מדוברת מאוד לומר 'של'.",
+    related:[
+      {ar:"إلي", tl:"אִלִי", he:"שלי (צורה חלופית)"},
+      {ar:"حقّ", tl:"חַקّ", he:"של (בלהגי מפרץ)"}
+    ]
+  },
+
+  "لطيف": {
+    translit:"לַטִיף", trans:"נחמד",
+    emoji:"😊",
+    morph:[
+      {ar:"لطيف", tl:'<span class="root-m">לַטִיף</span>', note:"שם תואר, ז' יחיד: 'נחמד / עדין'"},
+      {ar:"لطيفة", tl:'<span class="root-m">לַטִיפ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → נחמדה'},
+      {ar:"لطاف", tl:'<span class="root-m">לֻטַّ</span><span class="suf">אף</span>', note:"ריבוי → נחמדים"}
+    ],
+    examples:[
+      {ar:"جارنا كتير لطيف", tl:"גַ'ארְנַא כְּתִיר לַטִיף", he:"השכן שלנו מאוד נחמד"},
+      {ar:"شو هالبنت اللطيفة!", tl:"שוּ הַל-בִּנְת אל-לַטִיפֵה!", he:"איזו בחורה נחמדה!"}
+    ],
+    curio:"השורש ل-ط-ف = עדינות ורוך. 'لطف الله' (לֻטְף אללَّה) = חסד האל. תחשוב: לַטִיף = מישהו עם <u>לטיפה</u> — עדין ונעים.",
+    related:[
+      {ar:"حلو", tl:"חֵלוּ", he:"מתוק/יפה/נחמד"},
+      {ar:"طيّب", tl:"טַיֵّבּ", he:"טוב-לב"}
+    ]
+  },
+
+  "ساحر": {
+    translit:"סַאחֵר", trans:"קוסם",
+    emoji:"🧙",
+    morph:[
+      {ar:"ساحر", tl:'<span class="root-m">סַאחֵר</span>', note:"שם פועל (فاعل) מהשורש س-ح-ر: 'מי שמכשף' = קוסם"},
+      {ar:"ساحرة", tl:'<span class="root-m">סַאחְר</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → מכשפה'},
+      {ar:"سحر", tl:'<span class="root-m">סִחֵר</span>', note:"הפועל: 'כישף' / שם עצם 'כישוף'"}
+    ],
+    examples:[
+      {ar:"الساحر عمل حركة حلوة", tl:"א(ל)סַّאחֵר עִמֵל חַרַכֵּה חֵלְוֵה", he:"הקוסם עשה תרגיל יפה"},
+      {ar:"منظر ساحر", tl:"מַנְטַ'ר סַאחֵר", he:"נוף קסום"}
+    ],
+    curio:"השורש س-ح-ر = כישוף — קרוב לעברית 'שַחַר' אבל גם ל'سَحور' (סַחוּר — הסעודה לפני עלות השחר ברמדאן). הקסם של שעת הדמדומים. <b>סַאחֵר</b> מכשף אותך.",
+    related:[
+      {ar:"سحر", tl:"סִחֵר", he:"כישוף (שם עצם/פועל)"},
+      {ar:"مشعوذ", tl:"מְשַעְוֵז'", he:"קוסם-נוכל/אחיזת עיניים"}
+    ]
+  },
+
+  "إلى": {
+    translit:"אִלַא", trans:"ל, אל",
+    emoji:"➡️",
+    morph:[
+      {ar:"إلى", tl:'<span class="root-m">אִלַא</span>', note:"מילת יחס: 'אל / ל' (כיוון). ספרותית יותר מ-ع/لـ"},
+      {ar:"إليّ", tl:'<span class="root-m">אִלַ</span><span class="suf">יּ</span>', note:'סופית <span class="suf">יّ־</span> = גוף 1 → אליי'},
+      {ar:"إليك", tl:'<span class="root-m">אִלֵי</span><span class="suf">כּ</span>', note:'סופית <span class="suf">כּ־</span> = גוף 2 → אליך'}
+    ],
+    examples:[
+      {ar:"من البيت إلى الشغل", tl:"מִן אל-בֵּית אִלַא א(ל)שֻّעֵ'ל", he:"מהבית אל העבודה"},
+      {ar:"وصلنا إلى المحطة", tl:"וִצֵלְנַא אִלַא אל-מַחַטַّה", he:"הגענו אל התחנה"}
+    ],
+    curio:"<b>إلى</b> מקבילה כמעט מדויקת ל'אל' העברית — אותם אותיות (א-ל) ואותה משמעות! 'מן... إلى' = 'מ... אל'. אחת המקבילות הקלות ביותר לזכירה.",
+    related:[
+      {ar:"لـ", tl:"לִ־", he:"ל־ (קצר, מדובר)"},
+      {ar:"من", tl:"מִן", he:"מ־ / מן — ההפך (מוצא)"}
+    ]
+  },
+
+  "أرنب": {
+    translit:"אַרְנַבּ", trans:"ארנב",
+    emoji:"🐰",
+    morph:[
+      {ar:"أرنب", tl:'<span class="root-m">אַרְנַבּ</span>', note:"שם עצם, ז' יחיד: 'ארנב'"},
+      {ar:"أرانب", tl:'<span class="root-m">אַרַאנֵבּ</span>', note:"ריבוי שבור → ארנבים"},
+      {ar:"أرنبة", tl:'<span class="root-m">אַרְנַבּ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → ארנבה'}
+    ],
+    examples:[
+      {ar:"الأرنب بياكل جزر", tl:"אל-אַרְנַבּ בְּיַאכֻּל גַ'זַר", he:"הארנב אוכל גזר"},
+      {ar:"عندنا أرانب بالبيت", tl:"עִנְּדְנַא אַרַאנֵבּ בִּל-בֵּית", he:"יש לנו ארנבים בבית"}
+    ],
+    curio:"<b>أرنب</b> דומה מאוד לעברית '<u>ארנב</u>' — כמעט זהה! (א-ר-נ-ב). אחת המילים הקלות ביותר לזכירה בזכות הקרבה לעברית.",
+    related:[
+      {ar:"حيوان", tl:"חַיַוַאן", he:"חיה (כללי)"},
+      {ar:"قطّة", tl:"קֻטַّה", he:"חתולה — חיית בית נוספת"}
+    ]
+  },
+
+"دوّر على": {
+    translit:"דַוַّר עַלַא", trans:"חיפש את־",
+    emoji:"🔍",
+    morph:[
+      {ar:"دوّر", tl:'<span class="root-m">דַוַّר</span>', note:"בניין II — עבר, גוף 3 ז' יחיד: 'הוא חיפש' (הבסיס)"},
+      {ar:"بدوّر", tl:'<span class="pre">בִּ</span><span class="root-m">דַוֵّר</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → הוא מחפש'},
+      {ar:"دوّرت", tl:'<span class="root-m">דַוַّר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1/2 → חיפשתי / חיפשת'},
+      {ar:"بدوّروا", tl:'<span class="pre">בִּ</span><span class="root-m">דַוְّר</span><span class="suf">וּ</span>', note:'<span class="pre">בִּ־</span> הווה + <span class="suf">וּ־</span> רבים → הם מחפשים'},
+      {ar:"على", tl:'<span class="root-m">עַלַא</span>', note:"מילת יחס חובה: 'מחפש על' = מחפש את"}
+    ],
+    examples:[
+      {ar:"دوّرت على مفاتيحي", tl:"דַוַّרְת עַלַא מַפַאתִיחִי", he:"חיפשתי את המפתחות שלי (עבר)"},
+      {ar:"عم بدوّر على شغل", tl:"עַם בִּדַוֵّר עַלַא שֻעֵ'ל", he:"אני מחפש עבודה (כרגע)"},
+      {ar:"دوّر منيح!", tl:"דַוֵّר מְנִיח", he:"חפש טוב! (ציווי)"}
+    ],
+    curio:"השורש د-و-ر = 'לסובב/להסתובב' (دار — דַאר — הסתובב). מי שמחפש <b>מסתובב</b> ומחפש. אותו שורש ב'دار' (דַאר — בית/חצר) וב'دوّار' (דַוַّאר — מעגל תנועה).",
+    related:[
+      {ar:"لاقى", tl:"לַאקַא", he:"מצא — מה שקורה בסוף החיפוש"},
+      {ar:"فتّش", tl:"פַתַّש", he:"חיפש/חיטט (נרדף)"}
+    ]
+  },
+
+  "لاقى": {
+    translit:"לַאקַא", trans:"מצא",
+    emoji:"🎯",
+    morph:[
+      {ar:"لاقى", tl:'<span class="root-m">לַאקַא</span>', note:"בניין III — עבר, גוף 3 ז': 'הוא מצא' (הבסיס)"},
+      {ar:"بلاقي", tl:'<span class="pre">בִּ</span><span class="root-m">לַאקִי</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → מוצא'},
+      {ar:"لاقيت", tl:'<span class="root-m">לַאקֵ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → מצאתי'},
+      {ar:"لاقوا", tl:'<span class="root-m">לַאק</span><span class="suf">וּ</span>', note:'סופית <span class="suf">וּ־</span> = ריבוי → הם מצאו'}
+    ],
+    examples:[
+      {ar:"لاقيت محفظتي!", tl:"לַאקֵית מַחְפַטֵّ'תִי!", he:"מצאתי את הארנק שלי!"},
+      {ar:"ما لاقيت حدا", tl:"מַא לַאקֵית חַדַا", he:"לא מצאתי אף אחד"}
+    ],
+    curio:"מהשורש ل-ق-ي = פגישה/מציאה. אותו שורש כמו <b>لقاء</b> (לִקַאא' — מפגש) ו<b>التقى</b> (אִלְתַקַא — נפגש). תחשוב: למצוא = ל<u>היתקל</u> במשהו.",
+    related:[
+      {ar:"دوّر على", tl:"דַוַّר עַלַא", he:"חיפש — הפעולה שלפני המציאה"},
+      {ar:"حصّل", tl:"חַצַّל", he:"השיג/קיבל"}
+    ]
+  },
+
+  "توتّر": {
+    translit:"תְוַתַّר", trans:"נלחץ, נעשה מתוח",
+    emoji:"😰",
+    morph:[
+      {ar:"توتّر", tl:'<span class="pre">תְ</span><span class="root-m">וַתַّר</span>', note:"בניין V (تفعّل) — עבר: 'הוא נלחץ / נעשה מתוח'"},
+      {ar:"بيتوتّر", tl:'<span class="pre">בִּיתְ</span><span class="root-m">וַתַّר</span>', note:'תחילית <span class="pre">בִּיתְ־</span> = הווה גוף 3 → הוא נלחץ'},
+      {ar:"توتّرت", tl:'<span class="pre">תְ</span><span class="root-m">וַתַّר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → נלחצתי'}
+    ],
+    examples:[
+      {ar:"توتّرت قبل الإمتحان", tl:"תְוַתַّרְת קַבֵּל אל-אִמְתִחַאן", he:"נלחצתי לפני המבחן"},
+      {ar:"لا تتوتّر، كلّو تمام", tl:"לַא תִתְוַתַّר, כֻּלّוֹ תַמַאם", he:"אל תילחץ, הכול בסדר"}
+    ],
+    curio:"מהשורש و-ت-ر = מתח (כמו מיתר שמתוח!). <b>وتر</b> (וַתַר) = מיתר. תחשוב: כשנלחצים, הגוף <u>מתוח כמו מיתר</u>. דומה לעברית 'מיתר' ו'מתח'.",
+    related:[
+      {ar:"عصّب", tl:"עַצַّבּ", he:"עצבן / התעצבן"},
+      {ar:"قلق", tl:"קַלַק", he:"דאגה / חרדה"}
+    ]
+  },
+
+  "مسك": {
+    translit:"מִסֵכּ", trans:"החזיק, תפס",
+    emoji:"✊",
+    morph:[
+      {ar:"مسك", tl:'<span class="root-m">מִסֵכּ</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא החזיק/תפס' (הבסיס)"},
+      {ar:"بمسك", tl:'<span class="pre">בְּ</span><span class="root-m">מְסֵכּ</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → מחזיק'},
+      {ar:"مسكت", tl:'<span class="root-m">מְסַכּ</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → החזקתי / תפסתי'},
+      {ar:"إمسك!", tl:'<span class="pre">אִ</span><span class="root-m">מְסֵכּ</span>', note:'תחילית <span class="pre">אִ־</span> = ציווי → תפוס!'}
+    ],
+    examples:[
+      {ar:"مسك إيد ابنه", tl:"מִסֵכּ אִיד אִבְּנוֹ", he:"הוא החזיק את יד בנו"},
+      {ar:"إمسك الكاسة منيح", tl:"אִמְסֵכּ אל-כַּאסֵה מְנִיח", he:"תחזיק את הכוס טוב"}
+    ],
+    curio:"מהשורש م-س-ك = אחיזה. <b>مسك</b> (מִסְכּ) הוא גם 'מוֹר' (בושם יקר). תחשוב: מה שאתה תופס ביד ולא מרפה. 'مسكة' = ידית/אחיזה.",
+    related:[
+      {ar:"أخد", tl:"אַחַ'ד", he:"לקח"},
+      {ar:"شدّ", tl:"שַדّ", he:"משך / הידק"}
+    ]
+  },
+
+  "طول الوقت": {
+    translit:"טוּל אל-וַקֵת", trans:"כל הזמן",
+    emoji:"🕰️",
+    morph:[
+      {ar:"طول", tl:'<span class="root-m">טוּל</span>', note:"שם עצם: 'אורך' — כאן במובן 'לאורך'"},
+      {ar:"الوقت", tl:'<span class="pre">אל־</span><span class="root-m">וַקֵת</span>', note:'תחילית <span class="pre">אל־</span> = יידוע → הזמן'},
+      {ar:"طول الوقت", tl:'<span class="root-m">טוּל אל-וַקֵת</span>', note:"ביטוי קבוע: 'לאורך כל הזמן' = תמיד"}
+    ],
+    examples:[
+      {ar:"بشتغل طول الوقت", tl:"בַּשְתֵעֵ'ל טוּל אל-וַקֵת", he:"אני עובד כל הזמן"},
+      {ar:"طول الوقت عم يحكي", tl:"טוּל אל-וַקֵת עַם יֵחְכִּי", he:"כל הזמן הוא מדבר"}
+    ],
+    curio:"מילולית 'אורך הזמן'. <b>طول</b> (טוּל) = אורך — דומה לעברית 'טווח'? תחשוב: לכל <u>אורך</u> הזמן. השווה ל'طوال' (טַוַאל — לאורך).",
+    related:[
+      {ar:"دايمًا", tl:"דַאִימַן", he:"תמיד (נרדף)"},
+      {ar:"كل يوم", tl:"כֻּל יוֹם", he:"כל יום"}
+    ]
+  },
+
+  "ورقة": {
+    translit:"וַרַקַה", trans:"שטר, דף, עלה",
+    emoji:"📄",
+    morph:[
+      {ar:"ورقة", tl:'<span class="root-m">וַרַק</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> (ة) = יחידה → דף/עלה/שטר אחד'},
+      {ar:"ورق", tl:'<span class="root-m">וַרַק</span>', note:"שם קיבוצי: 'נייר' (כללי, ללא יחידה)"},
+      {ar:"أوراق", tl:'<span class="root-m">אַוְרַאק</span>', note:"ריבוי שבור → דפים / מסמכים / עלים"}
+    ],
+    examples:[
+      {ar:"أعطيني ورقة وقلم", tl:"אַעְטִינִי וַרַקַה וּ-קַלַם", he:"תן לי דף ועט"},
+      {ar:"وراق الشجر وقعت", tl:"אַוְרַאק א(ל)שַّגַ'ר וִקְעַת", he:"עלי העץ נשרו"}
+    ],
+    curio:"מילה אחת לשלושה דברים: דף, עלה (של עץ), ושטר כסף — כולם דקים ושטוחים! <b>ورق عنب</b> (וַרַק עִנַבּ) = עלי גפן. תחשוב: כל מה שדק כמו נייר.",
+    related:[
+      {ar:"دفتر", tl:"דַפְתַר", he:"מחברת"},
+      {ar:"مصاري", tl:"מַצַארִי", he:"כסף — קשור לשטרות"}
+    ]
+  },
+
+  "كمّل": {
+    translit:"כַּמֵّל", trans:"המשיך",
+    emoji:"▶️",
+    morph:[
+      {ar:"كمّل", tl:'<span class="root-m">כַּמַّל</span>', note:"בניין II — עבר, גוף 3 ז': 'הוא המשיך/השלים' (הבסיס)"},
+      {ar:"بكمّل", tl:'<span class="pre">בִּ</span><span class="root-m">כַּמֵّל</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → ממשיך'},
+      {ar:"كمّلت", tl:'<span class="root-m">כַּמַّל</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → המשכתי'},
+      {ar:"كمّل!", tl:'<span class="root-m">כַּמֵّל</span>', note:"ציווי: 'תמשיך!'"}
+    ],
+    examples:[
+      {ar:"كمّل شغلك", tl:"כַּמֵّל שֻעֵ'לַכּ", he:"תמשיך בעבודה שלך"},
+      {ar:"كمّلنا الفيلم", tl:"כַּמַّלְנַא אל-פִילֵם", he:"המשכנו/סיימנו את הסרט"}
+    ],
+    curio:"מהשורש ك-م-ل = שלמות (<b>كامل</b> — כַּאמֵל — שלם/מושלם). להמשיך = להוביל משהו ל<u>שלמותו</u>. דומה לרעיון 'להשלים'. שם נפוץ: كمال (כַּמַאל).",
+    related:[
+      {ar:"كامل", tl:"כַּאמֵל", he:"שלם / מושלם"},
+      {ar:"خلّص", tl:"חַ'לַّץ", he:"סיים / גמר"}
+    ]
+  },
+
+  "تطلّع": {
+    translit:"תְטַלַّע", trans:"הסתכל",
+    emoji:"👀",
+    morph:[
+      {ar:"تطلّع", tl:'<span class="pre">תְ</span><span class="root-m">טַלַّע</span>', note:"בניין V (تفعّل) — עבר: 'הוא הסתכל/התבונן'"},
+      {ar:"بيتطلّع", tl:'<span class="pre">בִּיתְ</span><span class="root-m">טַלַّע</span>', note:'תחילית <span class="pre">בִּיתְ־</span> = הווה גוף 3 → מסתכל'},
+      {ar:"تطلّعت", tl:'<span class="pre">תְ</span><span class="root-m">טַלַّע</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → הסתכלתי'},
+      {ar:"تطلّع!", tl:'<span class="pre">תְ</span><span class="root-m">טַלַّע</span>', note:"ציווי: 'תסתכל!'"}
+    ],
+    examples:[
+      {ar:"تطلّع عليّ", tl:"תְטַלַّע עַלַيّ", he:"הוא הסתכל עליי"},
+      {ar:"تطلّعي عالصورة", tl:"תְטַלַّעִי עַ-(ל)צּורַה", he:"תסתכלי על התמונה"}
+    ],
+    curio:"אותו שורש כמו <b>طلع</b> (טִלֵע — יצא/עלה) שכבר למדנו! כאן בבניין V זה 'להעלות מבט' = להסתכל. תחשוב: המבט <u>עולה</u> אל הדבר.",
+    related:[
+      {ar:"شاف", tl:"שַאף", he:"ראה"},
+      {ar:"نظر", tl:"נַטַ'ר", he:"הביט (ספרותי)"}
+    ]
+  },
+
+  "ملوّن": {
+    translit:"מְלַוַّן", trans:"צבעוני",
+    emoji:"🌈",
+    morph:[
+      {ar:"ملوّن", tl:'<span class="pre">מְ</span><span class="root-m">לַוַّן</span>', note:'תחילית <span class="pre">מְ־</span> = שם פעול → צבוע/צבעוני'},
+      {ar:"ملوّنة", tl:'<span class="pre">מְ</span><span class="root-m">לַוַّנ</span><span class="suf">ֵה</span>', note:'<span class="pre">מְ־</span> + סופית <span class="suf">ֵה־</span> נקבה → צבעונית'},
+      {ar:"لوّن", tl:'<span class="root-m">לַוַّן</span>', note:"הפועל: 'צבע / גיוון'"},
+      {ar:"لون", tl:'<span class="root-m">לוֹן</span>', note:"שם עצם: 'צבע'"}
+    ],
+    examples:[
+      {ar:"رسمة ملوّنة", tl:"רַסְמֵה מְלַוַّנֵה", he:"ציור צבעוני"},
+      {ar:"الأطفال لوّنوا الورق", tl:"אל-אַטְפַאל לַוַّנוּ אל-וַרַק", he:"הילדים צבעו את הנייר"}
+    ],
+    curio:"מהשורש ل-و-ن = צבע (<b>لون</b> — לוֹן — צבע). תחשוב: לוֹן נשמע כמו 'גוון'! משהו מ<u>לוّן</u> = מגוּון בצבעים.",
+    related:[
+      {ar:"لون", tl:"לוֹן", he:"צבע (שם עצם)"},
+      {ar:"زاهي", tl:"זַאהִי", he:"זוהר / עז (על צבע)"}
+    ]
+  },
+
+  "غيمة": {
+    translit:"עֵ'ימֵה", trans:"ענן",
+    emoji:"☁️",
+    morph:[
+      {ar:"غيمة", tl:'<span class="root-m">עֵ\'ימ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> (ة) = יחידה → ענן אחד'},
+      {ar:"غيم", tl:'<span class="root-m">עֵ\'ים</span>', note:"שם קיבוצי: 'עננים' (כללי)"},
+      {ar:"غيوم", tl:'<span class="root-m">עֻ\'יוּם</span>', note:"ריבוי → עננים"}
+    ],
+    examples:[
+      {ar:"في غيمة بالسما", tl:"פִי עֵ'ימֵה בִּ(ל)סַّמַא", he:"יש ענן בשמיים"},
+      {ar:"الجو غيم اليوم", tl:"אל-גַّו עֵ'ים אל-יוֹם", he:"מעונן היום"}
+    ],
+    curio:"מהשורש غ-ي-م = עננות. תחשוב: 'עֵ'ימֵה' עם הצליל הגרוני غ כמו <u>ערפל</u> שמסתיר. כש'الجو غيم' = מזג האוויר מעונן.",
+    related:[
+      {ar:"شمس", tl:"שַמְס", he:"שמש — ההפך"},
+      {ar:"مطر", tl:"מַטַר", he:"גשם — מה שמגיע מענן"}
+    ]
+  },
+
+  "وصل": {
+    translit:"וִצֵל", trans:"הגיע",
+    emoji:"📍",
+    morph:[
+      {ar:"وصل", tl:'<span class="root-m">וִצֵל</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא הגיע' (הבסיס)"},
+      {ar:"بوصل", tl:'<span class="pre">בְּ</span><span class="root-m">וְצַל</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → מגיע'},
+      {ar:"وصلت", tl:'<span class="root-m">וִצֵל</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → הגעתי'},
+      {ar:"وصلوا", tl:'<span class="root-m">וִצְל</span><span class="suf">וּ</span>', note:'סופית <span class="suf">וּ־</span> = ריבוי → הם הגיעו'}
+    ],
+    examples:[
+      {ar:"وصلت عالبيت", tl:"וִצֵלְת עַ-(ל)בֵּית", he:"הגעתי הביתה"},
+      {ar:"إمتى بتوصل؟", tl:"אִמְתַא בְּתוֹצַל?", he:"מתי תגיע?"}
+    ],
+    curio:"מהשורש و-ص-ل = חיבור/הגעה. <b>وصلة</b> (וַצְלֵה) = חיבור/מחבר. תחשוב: להגיע = ל<u>התחבר</u> ליעד. ההפך מ-<b>غادر</b> (עַ'אדַר — עזב).",
+    related:[
+      {ar:"طلع", tl:"טִלֵע", he:"יצא — הפעולה המשלימה"},
+      {ar:"رجع", tl:"רִגֵّע", he:"חזר"}
+    ]
+  },
+
+  "نشّف": {
+    translit:"נַשַّף", trans:"התייבש / ייבש",
+    emoji:"🧺",
+    morph:[
+      {ar:"نشّف", tl:'<span class="root-m">נַשַّף</span>', note:"בניין II — עבר: 'ייבש' או 'התייבש' (הבסיס)"},
+      {ar:"بنشّف", tl:'<span class="pre">בִּ</span><span class="root-m">נַשֵّף</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → מייבש'},
+      {ar:"نشّفت", tl:'<span class="root-m">נַשַّפ</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → ייבשתי'},
+      {ar:"نشّف!", tl:'<span class="root-m">נַשֵّף</span>', note:"ציווי: 'תייבש!'"}
+    ],
+    examples:[
+      {ar:"نشّف إيديك", tl:"נַשֵّף אִידֵיכּ", he:"תייבש את הידיים"},
+      {ar:"الغسيل نشّف", tl:"אל-עַ'סִיל נַשַّף", he:"הכביסה התייבשה"}
+    ],
+    curio:"מהשורש ن-ش-ف = יובש. <b>منشفة</b> (מִנְשַפֵה) = מגבת — הכלי שמייבש! תחשוב: מה שסופג ומייבש. ההפך מ'بلّل' (בַּלַّל — הרטיב).",
+    related:[
+      {ar:"منشفة", tl:"מִנְשַפֵה", he:"מגבת"},
+      {ar:"يبس", tl:"יִבֵּס", he:"התייבש / נעשה יבש"}
+    ]
+  },
+
+  "إكتشف": {
+    translit:"אִכְּתַשַף", trans:"גילה",
+    emoji:"💡",
+    morph:[
+      {ar:"إكتشف", tl:'<span class="pre">אִכְּתַ</span><span class="root-m">שַף</span>', note:"בניין VIII (إفتعل) — עבר: 'הוא גילה'"},
+      {ar:"بيكتشف", tl:'<span class="pre">בִּיכְּתַ</span><span class="root-m">שֵף</span>', note:'תחילית <span class="pre">בִּיכְּתַ־</span> = הווה גוף 3 → מגלה'},
+      {ar:"إكتشفت", tl:'<span class="pre">אִכְּתַ</span><span class="root-m">שַפ</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → גיליתי'}
+    ],
+    examples:[
+      {ar:"إكتشفت إنّو غلطان", tl:"אִכְּתַשַפְת אִנّוֹ עַ'לְטַאן", he:"גיליתי שהוא טועה"},
+      {ar:"العلماء إكتشفوا دوا", tl:"אל-עֻלַמַא אִכְּתַשַפוּ דַוַא", he:"המדענים גילו תרופה"}
+    ],
+    curio:"מהשורש ك-ش-ف = חשיפה/גילוי (<b>كشف</b> — כַּשַף — חשף). בניין VIII מוסיף 'גילוי עצמי'. תחשוב: לגלות = ל<u>הסיר את הכיסוי</u>. 'كشف طبّي' = בדיקה.",
+    related:[
+      {ar:"كشف", tl:"כַּשַף", he:"חשף / גילה (פשוט יותר)"},
+      {ar:"لاقى", tl:"לַאקַא", he:"מצא — דומה"}
+    ]
+  },
+
+  "عادة": {
+    translit:"עַאדֵה", trans:"הרגל, נוהג",
+    emoji:"🔁",
+    morph:[
+      {ar:"عادة", tl:'<span class="root-m">עַאד</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> (ة) → הרגל אחד'},
+      {ar:"عادات", tl:'<span class="root-m">עַאד</span><span class="suf">ַאת</span>', note:'סופית <span class="suf">ַאת־</span> = ריבוי → הרגלים/מנהגים'},
+      {ar:"عادةً", tl:'<span class="root-m">עַאד</span><span class="suf">ַתַן</span>', note:'סופית תנווין <span class="suf">ַתַן־</span> → "בדרך כלל"'}
+    ],
+    examples:[
+      {ar:"عادةً بشرب قهوة الصبح", tl:"עַאדַתַן בַּשְרַבּ קַהְוֵה א(ל)צֻّבֵּח", he:"בדרך כלל אני שותה קפה בבוקר"},
+      {ar:"هاي عادة سيّئة", tl:"הַאי עַאדֵה סַيّאֵה", he:"זה הרגל רע"}
+    ],
+    curio:"מהשורש ع-و-د = חזרה (<b>عاد</b> — עַאד — חזר). הרגל = משהו ש<u>חוזר</u> שוב ושוב! אותו שורש כמו 'عيد' (עִיד — חג, יום שחוזר). 'عادةً' = בדרך כלל.",
+    related:[
+      {ar:"دايمًا", tl:"דַאִימַן", he:"תמיד"},
+      {ar:"تقليد", tl:"תַקְלִיד", he:"מסורת / מנהג"}
+    ]
+  },
+
+  "إستقبل": {
+    translit:"אִסְתַקְבַּל", trans:"קיבל את פני",
+    emoji:"🤝",
+    morph:[
+      {ar:"إستقبل", tl:'<span class="pre">אִסְתַ</span><span class="root-m">קְבַּל</span>', note:"בניין X (إستفعل) — עבר: 'קיבל פנים / אירח'"},
+      {ar:"بيستقبل", tl:'<span class="pre">בִּיסְתַ</span><span class="root-m">קְבֵּל</span>', note:'תחילית <span class="pre">בִּיסְתַ־</span> = הווה גוף 3 → מקבל פנים'},
+      {ar:"إستقبلت", tl:'<span class="pre">אִסְתַ</span><span class="root-m">קְבַּל</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → קיבלתי את פני'}
+    ],
+    examples:[
+      {ar:"إستقبلونا بالورد", tl:"אִסְתַקְבַּלוּנַא בִּל-וַרְד", he:"קיבלו את פנינו בוורדים"},
+      {ar:"الفندق بيستقبل ضيوف", tl:"אל-פֻנְדֻק בִּיסְתַקְבֵּל דֻֿיוּף", he:"המלון מקבל אורחים"}
+    ],
+    curio:"מהשורש ق-ب-ل = 'מול/לפני/קבלה' (<b>قبل</b> — קַבֵּל — לפני; <b>قبّل</b> — קַבַّל — נישק!). בניין X = 'לקבל מישהו אל מול פניך'. <b>مستقبل</b> (מֻסְתַקְבַּל) = עתיד (מה שבא מולך).",
+    related:[
+      {ar:"رحّب", tl:"רַחַّבּ", he:"בירך לשלום"},
+      {ar:"إستضاف", tl:"אִסְתַדַֿאף", he:"אירח"}
+    ]
+  },
+
+  "زار": {
+    translit:"זַאר", trans:"ביקר",
+    emoji:"🚪",
+    morph:[
+      {ar:"زار", tl:'<span class="root-m">זַאר</span>', note:"בניין I (פועל חלול) — עבר: 'הוא ביקר' (הבסיס)"},
+      {ar:"بزور", tl:'<span class="pre">בִּ</span><span class="root-m">זוּר</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → מבקר'},
+      {ar:"زرت", tl:'<span class="root-m">זֻר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → ביקרתי (תנועת השורש משתנה!)'},
+      {ar:"زوروا", tl:'<span class="root-m">זוּר</span><span class="suf">וּ</span>', note:'סופית <span class="suf">וּ־</span> = ציווי רבים → בקרו!'}
+    ],
+    examples:[
+      {ar:"زرت ستّي", tl:"זֻרְת סִתִّי", he:"ביקרתי את סבתא שלי"},
+      {ar:"منزور القدس", tl:"מִנְזוּר אל-קֻדְס", he:"אנחנו מבקרים בירושלים"}
+    ],
+    curio:"מהשורש ز-و-ر = ביקור. <b>زيارة</b> (זִיַארַה) = ביקור. <b>زائر</b> (זַאאֵר) = מבקר/אורח. שים לב: בעבר גוף ראשון התנועה הופכת ל'זֻרְת' (פועל חלול).",
+    related:[
+      {ar:"زيارة", tl:"זִיַארַה", he:"ביקור (שם עצם)"},
+      {ar:"ضيف", tl:"דֵֿיף", he:"אורח"}
+    ]
+  },
+
+  "صينية": {
+    translit:"צִינִיֵّה", trans:"מגש",
+    emoji:"🍱",
+    morph:[
+      {ar:"صينية", tl:'<span class="root-m">צִינִיֵّ</span><span class="suf">ה</span>', note:"שם עצם נקבה: 'מגש' (גם 'מאפה במגש')"},
+      {ar:"صواني", tl:'<span class="root-m">צַוַאנִי</span>', note:"ריבוי → מגשים"}
+    ],
+    examples:[
+      {ar:"حُطّ الكاسات عالصينية", tl:"חֻטّ אל-כַּאסַאת עַ-(ל)צּינִיֵّה", he:"שים את הכוסות על המגש"},
+      {ar:"عملت صينية بطاطا", tl:"עִמֵלֵת צִינִיֵّה בַּטַאטַא", he:"הכנתי מגש תפוחי אדמה (תבשיל)"}
+    ],
+    curio:"מילולית 'סינית' — כי מגשים יפים הגיעו במקור מ<u>סין</u> (الصين — א(ל)צּין)! בדיוק כמו 'חרסינה'. תחשוב: צִינִיֵّה = משהו 'סיני'.",
+    related:[
+      {ar:"صحن", tl:"צַחְן", he:"צלחת — אותו שדה"},
+      {ar:"طبق", tl:"טַבַּק", he:"צלחת / מנה"}
+    ]
+  },
+
+  "معمول": {
+    translit:"מַעְמוּל", trans:"מעמול (עוגייה)",
+    emoji:"🍪",
+    morph:[
+      {ar:"معمول", tl:'<span class="root-m">מַעְמוּל</span>', note:"שם פעול (مفعول) מהשורש ع-م-ل: 'מה שנעשה/הוכן'"},
+      {ar:"عمل", tl:'<span class="root-m">עִמֵל</span>', note:"הפועל: 'עשה / הכין'"},
+      {ar:"معمول بـ", tl:'<span class="root-m">מַעְמוּל בִּ־</span>', note:"ביטוי: 'עשוי מ/ב־' (חומר)"}
+    ],
+    examples:[
+      {ar:"المعمول محشي تمر", tl:"אל-מַעְמוּל מַחְשִי תַמֵר", he:"המעמול ממולא בתמרים"},
+      {ar:"بنعمل معمول بالعيد", tl:"בִּנְעְמֵל מַעְמוּל בִּל-עִיד", he:"אנחנו מכינים מעמול בחג"}
+    ],
+    curio:"מהשורש ع-م-ل = עשייה (<b>عمل</b> — עִמֵל — עשה; <b>عامل</b> — עַאמֵל — פועל). מַעְמוּל = מילולית 'העשוי' — עוגייה ש<u>עושים</u> ביד בתבנית מיוחדת.",
+    related:[
+      {ar:"عمل", tl:"עִמֵל", he:"עשה / הכין (השורש)"},
+      {ar:"كعك", tl:"כַּעֵכּ", he:"עוגייה / כעך"}
+    ]
+  },
+
+  "حتى": {
+    translit:"חַתַّא", trans:"אפילו / עד",
+    emoji:"➕",
+    morph:[
+      {ar:"حتى", tl:'<span class="root-m">חַתַّא</span>', note:"מילית: 'אפילו' (להדגשה) או 'עד' (גבול) או 'כדי ש'"},
+      {ar:"حتى لو", tl:'<span class="root-m">חַתַّא לוֹ</span>', note:"ביטוי: 'אפילו אם'"},
+      {ar:"حتى الآن", tl:'<span class="root-m">חַתַّא ל-אַאן</span>', note:"ביטוי: 'עד עכשיו'"}
+    ],
+    examples:[
+      {ar:"حتى أنا ما بعرف", tl:"חַתַّא אַנַא מַא בַּעְרֵף", he:"אפילו אני לא יודע"},
+      {ar:"درست حتى الصبح", tl:"דַרַסְת חַתַّא א(ל)צֻّבֵּח", he:"למדתי עד הבוקר"}
+    ],
+    curio:"<b>حتى</b> רב-תכליתית: 'אפילו', 'עד', וגם 'כדי ש'. ההקשר קובע. תחשוב: הקו ש<u>עד</u> אליו מגיעים — ואפילו מעבר. דומה ל'حد' (חַדّ — גבול).",
+    related:[
+      {ar:"لحدّ", tl:"לַחַדّ", he:"עד (גבול/מקום)"},
+      {ar:"كمان", tl:"כַּמַאן", he:"גם / בנוסף"}
+    ]
+  },
+
+  "بناية": {
+    translit:"בִּנַאיֵה", trans:"בניין",
+    emoji:"🏢",
+    morph:[
+      {ar:"بناية", tl:'<span class="root-m">בִּנַאי</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> (ة) → בניין אחד'},
+      {ar:"بنايات", tl:'<span class="root-m">בִּנַאי</span><span class="suf">ַאת</span>', note:'סופית <span class="suf">ַאת־</span> = ריבוי → בניינים'},
+      {ar:"بنى", tl:'<span class="root-m">בַּנַא</span>', note:"הפועל: 'בנה'"},
+      {ar:"مبنى", tl:'<span class="pre">מַ</span><span class="root-m">בְּנַא</span>', note:'תחילית <span class="pre">מַ־</span> = מבנה (נרדף)'}
+    ],
+    examples:[
+      {ar:"بناية عالية", tl:"בִּנַאיֵה עַאלְיֵה", he:"בניין גבוה"},
+      {ar:"بنوا بناية جديدة", tl:"בַּנוּ בִּנַאיֵה גְ'דִידֵה", he:"בנו בניין חדש"}
+    ],
+    curio:"מהשורש ب-ن-ي = בנייה — <u>זהה לעברית</u> 'בנה'! (ב-נ-ה). <b>بنى</b> (בַּנַא) = בנה, <b>ابن</b> (אִבְּן) = בן (מה שאתה 'בונה'/מגדל). מקבילה קלה לזכירה.",
+    related:[
+      {ar:"عمارة", tl:"עִמַארַה", he:"בניין / בית מגורים"},
+      {ar:"بيت", tl:"בֵּית", he:"בית — גם מקביל לעברית"}
+    ]
+  }
+,
+
+"قصة": {
+    translit:"קֻצַّה", trans:"סיפור",
+    emoji:"📖",
+    morph:[
+      {ar:"قصّة", tl:'<span class="root-m">קֻצַّ</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> (ة) → סיפור אחד'},
+      {ar:"قصص", tl:'<span class="root-m">קִצַץ</span>', note:"ריבוי → סיפורים"},
+      {ar:"قصّ", tl:'<span class="root-m">קַצّ</span>', note:"הפועל: 'סיפר' (גם 'גזר/חתך')"}
+    ],
+    examples:[
+      {ar:"إحكيلي قصة", tl:"אִחְכִּילִי קֻצַّה", he:"ספר לי סיפור"},
+      {ar:"قصّة حلوة كتير", tl:"קֻצַّה חֵלְוֵה כְּתִיר", he:"סיפור מאוד יפה"}
+    ],
+    curio:"מהשורש ق-ص-ص = סיפור/גזירה. <b>قصّ</b> (קַצّ) = גם 'סיפר' וגם 'גזר במספריים'! תחשוב: לספר = ל<u>גזור</u> פרוסה מהמציאות ולמסור אותה. <b>مقصّ</b> (מַקַצّ) = מספריים.",
+    related:[
+      {ar:"حكاية", tl:"חִכַּאיֵה", he:"סיפור / מעשייה (נרדף)"},
+      {ar:"خبر", tl:"חַ'בַּר", he:"ידיעה / חדשה"}
+    ]
+  },
+
+  "إمتحان": {
+    translit:"אִמְתִחַאן", trans:"מבחן",
+    emoji:"📝",
+    morph:[
+      {ar:"إمتحان", tl:'<span class="pre">אִמְתִ</span><span class="root-m">חַאן</span>', note:"שם פעולה מבניין VIII מהשורש م-ح-ن: 'מבחן'"},
+      {ar:"إمتحانات", tl:'<span class="pre">אִמְתִ</span><span class="root-m">חַאנ</span><span class="suf">ַאת</span>', note:'סופית <span class="suf">ַאת־</span> = ריבוי → מבחנים'},
+      {ar:"إمتحن", tl:'<span class="pre">אִמְתַ</span><span class="root-m">חַן</span>', note:"הפועל: 'בחן'"}
+    ],
+    examples:[
+      {ar:"عندي إمتحان بكرا", tl:"עִנְּדִי אִמְתִחַאן בֻּכְּרַא", he:"יש לי מבחן מחר"},
+      {ar:"نجحت بالإمتحان", tl:"נַגַ'חְת בִּל-אִמְתִחַאן", he:"עברתי את המבחן"}
+    ],
+    curio:"מהשורש م-ح-ن = ניסיון/מבחן (<b>محنة</b> — מִחְנֵה — מצוקה/ניסיון קשה). מבחן = רגע שבו אתה <u>נמבחן</u> ונבדק. דומה לרעיון 'מבחן' בעברית.",
+    related:[
+      {ar:"فحص", tl:"פַחַץ", he:"בדיקה — דומה"},
+      {ar:"نجح", tl:"נַגַ'ח", he:"הצליח / עבר"}
+    ]
+  },
+
+  "محطة": {
+    translit:"מַחַטַّה", trans:"תחנה",
+    emoji:"🚉",
+    morph:[
+      {ar:"محطّة", tl:'<span class="pre">מַ</span><span class="root-m">חַטַّ</span><span class="suf">ה</span>', note:'תחילית <span class="pre">מַ־</span> = שם מקום → "מקום שמניחים/עוצרים בו"'},
+      {ar:"محطّات", tl:'<span class="pre">מַ</span><span class="root-m">חַטַّ</span><span class="suf">את</span>', note:'סופית <span class="suf">את־</span> = ריבוי → תחנות'}
+    ],
+    examples:[
+      {ar:"محطّة الباص", tl:"מַחַטַّת אל-בַּאץ", he:"תחנת האוטובוס"},
+      {ar:"نزلت بالمحطّة", tl:"נִזֵלְת בִּל-מַחַטַّה", he:"ירדתי בתחנה"}
+    ],
+    curio:"אותו שורש כמו <b>حُط</b> (חֻטّ — שים!) שלמדנו בקבוצה 1! ה-ح-ط-ط = הנחה/עצירה. <b>محطّة</b> = מילולית 'מקום שבו <u>מניחים/עוצרים</u>'. התחילית مَ- מציינת מקום.",
+    related:[
+      {ar:"حُط", tl:"חֻטّ", he:"שים — אותו שורש"},
+      {ar:"موقف", tl:"מַוְקֵף", he:"חניון / תחנה"}
+    ]
+  },
+
+  "خاف": {
+    translit:"חַ'אף", trans:"פחד",
+    emoji:"😨",
+    morph:[
+      {ar:"خاف", tl:'<span class="root-m">חַ\'אף</span>', note:"בניין I (פועל חלול) — עבר: 'הוא פחד' (הבסיס)"},
+      {ar:"بخاف", tl:'<span class="pre">בְּ</span><span class="root-m">חַ\'אף</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → פוחד'},
+      {ar:"خفت", tl:'<span class="root-m">חֻ\'פ</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → פחדתי (התנועה משתנה!)'},
+      {ar:"لا تخاف", tl:'<span class="pre">לַא תְ</span><span class="root-m">חַ\'אף</span>', note:"שלילה: 'אל תפחד'"}
+    ],
+    examples:[
+      {ar:"خفت من الكلب", tl:"חֻ'פְת מִן אל-כַּלְבּ", he:"פחדתי מהכלב"},
+      {ar:"لا تخاف، أنا معك", tl:"לַא תְחַ'אף, אַנַא מַעַכּ", he:"אל תפחד, אני איתך"}
+    ],
+    curio:"מהשורש خ-و-ف = פחד (<b>خوف</b> — חַ'וְף — פחד). פועל חלול: בעבר גוף ראשון 'חַ'אף' הופך ל'חֻ'פְת'. <b>خايف</b> (חַ'איֵף) = מפחד/מפוחד.",
+    related:[
+      {ar:"خوف", tl:"חַ'וְף", he:"פחד (שם עצם)"},
+      {ar:"فزع", tl:"פַזַע", he:"בהלה / חרדה"}
+    ]
+  },
+
+  "تأخر": {
+    translit:"תְאַחַّר", trans:"איחר",
+    emoji:"⏰",
+    morph:[
+      {ar:"تأخّر", tl:'<span class="pre">תְ</span><span class="root-m">אַחַّר</span>', note:"בניין V (تفعّل) — עבר: 'הוא איחר'"},
+      {ar:"بيتأخّر", tl:'<span class="pre">בִּיתְ</span><span class="root-m">אַחַّר</span>', note:'תחילית <span class="pre">בִּיתְ־</span> = הווה גוף 3 → מאחר'},
+      {ar:"تأخّرت", tl:'<span class="pre">תְ</span><span class="root-m">אַחַّר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → איחרתי'}
+    ],
+    examples:[
+      {ar:"تأخّرت عالشغل", tl:"תְאַחַّרְת עַ-(ל)שֻّעֵ'ל", he:"איחרתי לעבודה"},
+      {ar:"ليش تأخّرت؟", tl:"לֵיש תְאַחַّרְת?", he:"למה איחרת?"}
+    ],
+    curio:"מהשורש أ-خ-ر = 'אחור/מאוחר' (<b>آخر</b> — אַאחֵ'ר — אחרון; <b>متأخّر</b> — מֻתְאַחֵّ'ר — מאחר). תחשוב: לאחר = להישאר מ<u>אחור</u>. ההפך מ-<b>بكّر</b> (בַּכַّר — הקדים).",
+    related:[
+      {ar:"آخر", tl:"אַאחֵ'ר", he:"אחרון / סוף"},
+      {ar:"وصل متأخّر", tl:"וִצֵל מֻתְאַחֵّ'ר", he:"הגיע מאוחר"}
+    ]
+  },
+
+  "خسر": {
+    translit:"חַ'סַר", trans:"הפסיד",
+    emoji:"📉",
+    morph:[
+      {ar:"خسر", tl:'<span class="root-m">חַ\'סֵר</span>', note:"בניין I — עבר, גוף 3 ז': 'הוא הפסיד' (הבסיס)"},
+      {ar:"بخسر", tl:'<span class="pre">בְּ</span><span class="root-m">חְ\'סַר</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → מפסיד'},
+      {ar:"خسرت", tl:'<span class="root-m">חְ\'סֵר</span><span class="suf">ְת</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → הפסדתי'}
+    ],
+    examples:[
+      {ar:"خسرنا المباراة", tl:"חְ'סֵרְנַא אל-מֻבַּארַאה", he:"הפסדנו את המשחק"},
+      {ar:"خسرت مصاري كتير", tl:"חְ'סֵרְת מַצַארִי כְּתִיר", he:"הפסדתי הרבה כסף"}
+    ],
+    curio:"מהשורש خ-س-ر = הפסד/אובדן (<b>خسارة</b> — חַ'סַארַה — הפסד, וגם 'חבל!'). כשאומרים 'يا خسارة!' = 'איזה חבל!'. ההפך מ-<b>ربح</b> (רִבֵּח — הרוויח/ניצח).",
+    related:[
+      {ar:"ربح", tl:"רִבֵּח", he:"הרוויח / ניצח — ההפך"},
+      {ar:"خسارة", tl:"חַ'סַארַה", he:"הפסד / חבל"}
+    ]
+  },
+
+  "صديق": {
+    translit:"צַדִיק", trans:"חבר",
+    emoji:"🧑‍🤝‍🧑",
+    morph:[
+      {ar:"صديق", tl:'<span class="root-m">צַדִיק</span>', note:"שם תואר/עצם, ז' יחיד: 'חבר'"},
+      {ar:"صديقة", tl:'<span class="root-m">צַדִיק</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> = נקבה → חברה'},
+      {ar:"أصدقاء", tl:'<span class="root-m">אַצְדִקַאא\'</span>', note:"ריבוי שבור → חברים"},
+      {ar:"صديقي", tl:'<span class="root-m">צַדִיק</span><span class="suf">ִי</span>', note:'סופית <span class="suf">ִי־</span> = שלי → החבר שלי'}
+    ],
+    examples:[
+      {ar:"هاد صديقي العزيز", tl:"הַאד צַדִיקִי אל-עַזִיז", he:"זה החבר היקר שלי"},
+      {ar:"عندي أصدقاء كتار", tl:"עִנְّדִי אַצְדִקַאא' כְּתַאר", he:"יש לי הרבה חברים"}
+    ],
+    curio:"מהשורש ص-د-ق = אמת/כנות (<b>صدق</b> — צִדֵק — דיבר אמת; <b>صادق</b> — צַאדֵק — כן/אמיתי). חבר אמיתי = מי ש<u>כן</u> איתך. <u>זהה לעברית</u> 'צדיק' באותיות! (צ-ד-ק).",
+    related:[
+      {ar:"رفيق", tl:"רַפִיק", he:"חבר / רֵע (נרדף)"},
+      {ar:"صاحب", tl:"צַאחֵבּ", he:"חבר / בעלים"}
+    ]
+  },
+
+  "ساق": {
+    translit:"סַאק", trans:"נהג",
+    emoji:"🚗",
+    morph:[
+      {ar:"ساق", tl:'<span class="root-m">סַאק</span>', note:"בניין I (פועל חלול) — עבר: 'הוא נהג' (הבסיס)"},
+      {ar:"بسوق", tl:'<span class="pre">בִּ</span><span class="root-m">סוּק</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → נוהג'},
+      {ar:"سقت", tl:'<span class="root-m">סֻק</span><span class="suf">ְت</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → נהגתי'},
+      {ar:"سواق", tl:'<span class="root-m">סַוַّאק</span>', note:"שם פועל → נהג (מקצוע)"}
+    ],
+    examples:[
+      {ar:"ساق السيّارة بسرعة", tl:"סַאק א(ל)סַّيّארַה בִּסֻרְעַה", he:"הוא נהג מהר"},
+      {ar:"بسوق من زمان", tl:"בַּסוּק מִן זַמַאן", he:"אני נוהג מזמן"}
+    ],
+    curio:"מהשורש س-و-ق = הנעה/נהיגה. <b>سوق</b> (סוּק) = שוק (מקום שאליו 'מובילים' סחורה)! ו<b>سوّاق</b> (סַוַّאק) = נהג. תחשוב: לנהוג = ל<u>הוביל</u> את הרכב קדימה.",
+    related:[
+      {ar:"سوّاق", tl:"סַוַّאק", he:"נהג (מקצוע)"},
+      {ar:"قاد", tl:"קַאד", he:"נהג / הוביל (ספרותי)"}
+    ]
+  },
+
+  "رصيف": {
+    translit:"רַצִיף", trans:"מדרכה",
+    emoji:"🛣️",
+    morph:[
+      {ar:"رصيف", tl:'<span class="root-m">רַצִיף</span>', note:"שם עצם, ז': 'מדרכה' (גם 'רציף')"},
+      {ar:"أرصفة", tl:'<span class="root-m">אַרְצִפֵה</span>', note:"ריבוי שבור → מדרכות"}
+    ],
+    examples:[
+      {ar:"إمشي عالرصيف", tl:"אִמְשִי עַ-(ל)רַّצִיף", he:"לך על המדרכה"},
+      {ar:"الرصيف مكسور", tl:"א(ל)רַّצִיף מַכְּסוּר", he:"המדרכה שבורה"}
+    ],
+    curio:"מהשורש ر-ص-ف = ריצוף/סידור (<b>رصف</b> — רַצַף — ריצף/סידר בשורה). מדרכה = משטח <u>מרוצף</u>. <u>זהה לעברית</u> 'רצף/ריצוף'! גם 'רציף' של רכבת מאותו רעיון.",
+    related:[
+      {ar:"طريق", tl:"טַרִיק", he:"דרך / כביש"},
+      {ar:"شارع", tl:"שַארֵע", he:"רחוב"}
+    ]
+  },
+
+  "ضو": {
+    translit:"דַֿוّ", trans:"אור",
+    emoji:"💡",
+    morph:[
+      {ar:"ضو", tl:'<span class="root-m">דַֿוّ</span>', note:"שם עצם: 'אור' (מדובר; ספרותי: ضوء)"},
+      {ar:"أضوية", tl:'<span class="root-m">אַדְֿוִיֵה</span>', note:"ריבוי → אורות"},
+      {ar:"ضوّى", tl:'<span class="root-m">דַֿוַّא</span>', note:"הפועל: 'האיר / הדליק אור'"}
+    ],
+    examples:[
+      {ar:"شعّل الضو", tl:"שַעֵّל א(ל)דֿّוّ", he:"הדלק את האור"},
+      {ar:"الضو قوي", tl:"א(ל)דֿّוّ קַוִי", he:"האור חזק"}
+    ],
+    curio:"מהשורש ض-و-ء = אור/הארה. <b>ضوء</b> (דַֿוְא') = אור, <b>أضاء</b> (אַדַֿאא' — האיר). תחשוב: ה-ضّ הגרוני כמו אור חזק שמסנוור. ההפך מ-<b>عتمة</b> (עַתְמֵה — חושך).",
+    related:[
+      {ar:"نور", tl:"נוּר", he:"אור / נוּר (נרדף)"},
+      {ar:"عتمة", tl:"עַתְמֵה", he:"חושך — ההפך"}
+    ]
+  },
+
+  "ممنون": {
+    translit:"מַמְנוּן", trans:"אסיר תודה",
+    emoji:"🙏",
+    morph:[
+      {ar:"ممنون", tl:'<span class="pre">מַ</span><span class="root-m">מְנוּן</span>', note:"שם פעול: 'אסיר תודה / מודה' (ז')"},
+      {ar:"ممنونة", tl:'<span class="pre">מַ</span><span class="root-m">מְנוּנ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → אסירת תודה'},
+      {ar:"ممنونك", tl:'<span class="pre">מַ</span><span class="root-m">מְנוּנ</span><span class="suf">ַכּ</span>', note:'סופית <span class="suf">ַכּ־</span> → אני מודה לך'}
+    ],
+    examples:[
+      {ar:"ممنون كتير", tl:"מַמְנוּן כְּתִיר", he:"תודה רבה (אסיר תודה מאוד)"},
+      {ar:"أنا ممنونك عالمساعدة", tl:"אַנַא מַמְנוּנַכּ עַ-(ל)מֻסַאעַדֵה", he:"אני מודה לך על העזרה"}
+    ],
+    curio:"מהשורש م-ن-ن = חסד/טובה (<b>منّة</b> — מִנֵّה — טובה/חסד). מַמְנוּן = מי ש<u>קיבל טובה</u> ולכן אסיר תודה. דרך נפוצה מאוד לומר 'תודה' בלבנט.",
+    related:[
+      {ar:"شكراً", tl:"שֻכְּרַן", he:"תודה (הרגיל)"},
+      {ar:"مشكور", tl:"מַשְכּוּר", he:"מי שמודים לו"}
+    ]
+  },
+
+  "وصّل": {
+    translit:"וַצַّל", trans:"לקח מישהו ממקום למקום",
+    emoji:"🚕",
+    morph:[
+      {ar:"وصّل", tl:'<span class="root-m">וַצַّל</span>', note:"בניין II — עבר: 'הסיע / הוביל' (הבסיס)"},
+      {ar:"بوصّل", tl:'<span class="pre">בِ</span><span class="root-m">וַצֵّל</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מסיע'},
+      {ar:"وصّلت", tl:'<span class="root-m">וַצַّל</span><span class="suf">ְت</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → הסעתי / לקחתי'},
+      {ar:"وصّلني", tl:'<span class="root-m">וַצֵّל</span><span class="suf">ְנִי</span>', note:'סופית <span class="suf">ְנִי־</span> = אותי → קח אותי'}
+    ],
+    examples:[
+      {ar:"وصّلني عالبيت", tl:"וַצֵّלְנִי עַ-(ל)בֵּית", he:"קח אותי הביתה"},
+      {ar:"وصّلت صاحبي عالمطار", tl:"וַצַّלְת צַאחְבִּי עַ-(ל)מַטַאר", he:"הסעתי את חבר שלי לשדה התעופה"}
+    ],
+    curio:"בניין II (הכפלה) של <b>وصل</b> (וִצֵל — הגיע) שלמדנו! ההכפלה הופכת 'להגיע' ל'לגרום למישהו להגיע' = להסיע. תחשוב: וַצַّל = 'מ<u>גיע</u>' מישהו ליעד.",
+    related:[
+      {ar:"وصل", tl:"וִצֵל", he:"הגיע — אותו שורש"},
+      {ar:"أخد", tl:"אַחַ'ד", he:"לקח"}
+    ]
+  },
+
+  "يبدأ": {
+    translit:"יִבְּדַא", trans:"יתחיל",
+    emoji:"🏁",
+    morph:[
+      {ar:"يبدأ", tl:'<span class="pre">יִ</span><span class="root-m">בְּדַא</span>', note:'תחילית <span class="pre">יִ־</span> = עתיד/הווה גוף 3 ז\' → הוא יתחיל'},
+      {ar:"بدأ", tl:'<span class="root-m">בַּדַא</span>', note:"עבר, גוף 3 ז': 'הוא התחיל' (הבסיס)"},
+      {ar:"بلّش", tl:'<span class="root-m">בַּלַّש</span>', note:"נרדף מדובר נפוץ: 'התחיל'"},
+      {ar:"بديت", tl:'<span class="root-m">בַּדֵ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → התחלתי'}
+    ],
+    examples:[
+      {ar:"الفيلم يبدأ الساعة ثمانية", tl:"אל-פִילֵם יִבְּדַא א(ל)סַّאעַה תַמַאנְיֵה", he:"הסרט יתחיל בשמונה"},
+      {ar:"بديت أتعلّم عربي", tl:"בַּדֵית אַתְעַלַّם עַרַבִּי", he:"התחלתי ללמוד ערבית"}
+    ],
+    curio:"מהשורש ب-د-أ = התחלה (<b>بداية</b> — בִּדַאיֵה — התחלה). ה-ي בתחילת הפועל = סימן עתיד/הווה לגוף שלישי. ההפך מ-<b>خلّص</b> (חַ'לַّץ — סיים).",
+    related:[
+      {ar:"بلّش", tl:"בַּלַّש", he:"התחיל (מדובר)"},
+      {ar:"خلّص", tl:"חַ'לַّץ", he:"סיים — ההפך"}
+    ]
+  },
+
+  "ساوى": {
+    translit:"סַאוַא", trans:"עשה / שווה",
+    emoji:"🛠️",
+    morph:[
+      {ar:"ساوى", tl:'<span class="root-m">סַאוַא</span>', note:"בניין III — עבר: 'עשה / שווה (בערך)' (הבסיס)"},
+      {ar:"بساوي", tl:'<span class="pre">בִּ</span><span class="root-m">סַאוִי</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → עושה / שווה'},
+      {ar:"ساويت", tl:'<span class="root-m">סַאוֵ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → עשיתי'}
+    ],
+    examples:[
+      {ar:"شو بدّك تساوي؟", tl:"שוּ בִּדַّכּ תְסַאוִי?", he:"מה אתה רוצה לעשות?"},
+      {ar:"هاد بساوي ميّة شيكل", tl:"הַאד בִּסַאוִי מִיّה שֵיכֵּל", he:"זה שווה מאה שקל"}
+    ],
+    curio:"מהשורש س-و-ي = שוויון (<b>سوا</b> — סַוַא — יחד; <b>مساواة</b> — מֻסַאוַאה — שוויון). 'לעשות' ו'לשווה' מאותו רעיון: ל<u>ייצר/להשוות</u> ערך. דומה לעברית 'שווה'.",
+    related:[
+      {ar:"عمل", tl:"עִמֵל", he:"עשה (נרדף)"},
+      {ar:"سوا", tl:"סַוַא", he:"יחד / ביחד"}
+    ]
+  },
+
+  "سافر": {
+    translit:"סַאפַר", trans:"נסע (לטיול)",
+    emoji:"✈️",
+    morph:[
+      {ar:"سافر", tl:'<span class="root-m">סַאפַר</span>', note:"בניין III — עבר: 'הוא נסע (למרחק)' (הבסיס)"},
+      {ar:"بسافر", tl:'<span class="pre">בִּ</span><span class="root-m">סַאפֵר</span>', note:'תחילית <span class="pre">בִּ־</span> = הווה → נוסע'},
+      {ar:"سافرت", tl:'<span class="root-m">סַאפַר</span><span class="suf">ְت</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → נסעתי'},
+      {ar:"بدّي سافر", tl:'<span class="root-m">בִּדִّי סַאפֵר</span>', note:"ביטוי: 'אני רוצה לנסוע'"}
+    ],
+    examples:[
+      {ar:"سافرت عتركيا", tl:"סַאפַרְת עַ-תֻרְכִּיַא", he:"נסעתי לטורקיה"},
+      {ar:"بحبّ سافر بالصيف", tl:"בַּחֵבּّ סַאפֵר בִּ(ל)צֵّיף", he:"אני אוהב לנסוע בקיץ"}
+    ],
+    curio:"מהשורש س-ف-ر = נסיעה (<b>سفر</b> — סַפַר — מסע; <b>سفير</b> — סַפִיר — שגריר, מי שנשלח למרחק!). תחשוב: לנסוע למרחק = ל<u>ספר</u> מרחקים. השווה 'ספר' בעברית.",
+    related:[
+      {ar:"سفر", tl:"סַפַר", he:"מסע / נסיעה (שם עצם)"},
+      {ar:"راح", tl:"רַאח", he:"הלך / נסע (קרוב)"}
+    ]
+  },
+
+  "جاوب": {
+    translit:"גַ'אוַבּ", trans:"ענה",
+    emoji:"💬",
+    morph:[
+      {ar:"جاوب", tl:'<span class="root-m">גַ\'אוַבּ</span>', note:"בניין III — עבר: 'הוא ענה' (הבסיס)"},
+      {ar:"بجاوب", tl:'<span class="pre">בِ</span><span class="root-m">גַ\'אוֵבּ</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → עונה'},
+      {ar:"جاوبت", tl:'<span class="root-m">גַ\'אוַבּ</span><span class="suf">ְت</span>', note:'סופית <span class="suf">ְת־</span> = עבר גוף 1 → עניתי'},
+      {ar:"جاوبني", tl:'<span class="root-m">גַ\'אוֵבּ</span><span class="suf">ְنِי</span>', note:'סופית <span class="suf">ְنِי־</span> = אותי → ענה לי'}
+    ],
+    examples:[
+      {ar:"جاوب عالسؤال", tl:"גַ'אוַבּ עַ-(ל)סֻّאַאל", he:"הוא ענה על השאלה"},
+      {ar:"ليش ما بتجاوب؟", tl:"לֵיש מַא בִּתְגַ'אוֵבּ?", he:"למה אתה לא עונה?"}
+    ],
+    curio:"מהשורש ج-و-ب = מענה (<b>جواب</b> — גַ'וַאבּ — תשובה). תחשוב: לענות = להחזיר <u>גַ'וַאבּ</u> (תשובה). 'سؤال وجواب' (סֻאַאל וּ-גַ'וַאבּ) = שאלה ותשובה.",
+    related:[
+      {ar:"جواب", tl:"גַ'וַאבּ", he:"תשובה (שם עצם)"},
+      {ar:"سأل", tl:"סַאַל", he:"שאל — הפעולה ההפוכה"}
+    ]
+  },
+
+  "حافظ": {
+    translit:"חַאפַט'", trans:"שמר",
+    emoji:"🛡️",
+    morph:[
+      {ar:"حافظ", tl:'<span class="root-m">חַאפַט\'</span>', note:"בניין III — עבר: 'הוא שמר / שמר על' (הבסיס)"},
+      {ar:"بحافظ", tl:'<span class="pre">בِ</span><span class="root-m">חַאפֵט\'</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → שומר'},
+      {ar:"حافظت", tl:'<span class="root-m">חַאפַט\'</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → שמרתי'},
+      {ar:"حافظ على", tl:'<span class="root-m">חַאפַט\' עַלַא</span>', note:"ביטוי: 'שמר על־'"}
+    ],
+    examples:[
+      {ar:"حافظ على صحّتك", tl:"חַאפֵט' עַלַא צֵחַّתַכּ", he:"שמור על הבריאות שלך"},
+      {ar:"حافظت عالسرّ", tl:"חַאפַט'ְת עַ-(ל)סִّרّ", he:"שמרתי על הסוד"}
+    ],
+    curio:"מהשורש ح-ف-ظ = שמירה/זיכרון (<b>حفظ</b> — חִפֵט' — שמר/שינן בעל-פה; <b>محفظة</b> — מַחְפַטַّ'ה — ארנק, ששומר כסף). <b>حافظ</b> = גם תואר למי ששינן את הקוראן בעל-פה.",
+    related:[
+      {ar:"حمى", tl:"חַמַא", he:"הגן"},
+      {ar:"محفظة", tl:"מַחְפַטַّ'ה", he:"ארנק — אותו שורש"}
+    ]
+  },
+
+  "حاول": {
+    translit:"חַאוַל", trans:"ניסה",
+    emoji:"🤞",
+    morph:[
+      {ar:"حاول", tl:'<span class="root-m">חַאוַל</span>', note:"בניין III — עבר: 'הוא ניסה' (הבסיס)"},
+      {ar:"بحاول", tl:'<span class="pre">בِ</span><span class="root-m">חַאוֵל</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מנסה'},
+      {ar:"حاولت", tl:'<span class="root-m">חַאוַל</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → ניסיתי'},
+      {ar:"حاول!", tl:'<span class="root-m">חַאוֵל</span>', note:"ציווי: 'תנסה!'"}
+    ],
+    examples:[
+      {ar:"حاولت بسّ ما قدرت", tl:"חַאוַלְת בַּסّ מַא קְדֵרְת", he:"ניסיתי אבל לא הצלחתי"},
+      {ar:"حاول مرّة تانية", tl:"חַאוֵל מַרّה תַאנְיֵה", he:"נסה שוב (פעם נוספת)"}
+    ],
+    curio:"מהשורש ح-و-ل = מצב/שינוי/ניסיון (אותו שורש כמו <b>حوّل</b> — חַוַّל — הפך/שינה). תחשוב: לנסות = לנסות ל<u>שנות מצב</u>. <b>محاولة</b> (מֻחַאוַלֵה) = ניסיון.",
+    related:[
+      {ar:"جرّب", tl:"גַ'רַّבּ", he:"ניסה / התנסה (נרדף)"},
+      {ar:"محاولة", tl:"מֻחַאוַלֵה", he:"ניסיון (שם עצם)"}
+    ]
+  },
+
+  "سامح": {
+    translit:"סַאמַח", trans:"סלח",
+    emoji:"🕊️",
+    morph:[
+      {ar:"سامح", tl:'<span class="root-m">סַאמַח</span>', note:"בניין III — עבר: 'הוא סלח' (הבסיס)"},
+      {ar:"بسامح", tl:'<span class="pre">בِ</span><span class="root-m">סַאמֵח</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → סולח'},
+      {ar:"سامحت", tl:'<span class="root-m">סַאמַח</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → סלחתי'},
+      {ar:"سامحني", tl:'<span class="root-m">סַאמֵח</span><span class="suf">ْنِي</span>', note:'סופית <span class="suf">ْنِي־</span> = אותי → סלח לי'}
+    ],
+    examples:[
+      {ar:"سامحني، غلطت", tl:"סַאמֵחְנִי, עְ'לֵטְת", he:"סלח לי, טעיתי"},
+      {ar:"الله بسامح", tl:"אַללَّה בִּסַאמֵח", he:"אלוהים סולח"}
+    ],
+    curio:"מהשורש س-م-ح = התרה/סליחה (<b>سمح</b> — סַמַח — הרשה/התיר; <b>سماح</b> — סַמַאח — סלחנות). תחשוב: לסלוח = ל<u>התיר</u> את העוול. 'سمح لي' = הרשה לי.",
+    related:[
+      {ar:"عفا", tl:"עַפַא", he:"מחל / חנן"},
+      {ar:"سمح", tl:"סַמַח", he:"הרשה / התיר"}
+    ]
+  },
+
+  "حب": {
+    translit:"חַבّ", trans:"אהב",
+    emoji:"❤️",
+    morph:[
+      {ar:"حبّ", tl:'<span class="root-m">חַבّ</span>', note:"בניין I (מוכפל) — עבר: 'הוא אהב' (הבסיס)"},
+      {ar:"بحبّ", tl:'<span class="pre">בְּ</span><span class="root-m">חֵבّ</span>', note:'תחילית <span class="pre">בְּ־</span> = הווה → אוהב'},
+      {ar:"حبّيت", tl:'<span class="root-m">חַבّ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → אהבתי'},
+      {ar:"بحبّك", tl:'<span class="pre">בְּ</span><span class="root-m">חֵבّ</span><span class="suf">ַכּ</span>', note:'<span class="pre">בְּ־</span> הווה + <span class="suf">ַכּ־</span> אותך → אני אוהב אותך'}
+    ],
+    examples:[
+      {ar:"بحبّك كتير", tl:"בְּחֵבַّכּ כְּתִיר", he:"אני אוהב אותך מאוד"},
+      {ar:"بحبّ القهوة", tl:"בְּחֵבّ אל-קַהְוֵה", he:"אני אוהב קפה"}
+    ],
+    curio:"מהשורש ح-ب-ب = אהבה — אותו שורש כמו <b>حبّة</b> (חַבֵّה — גרגר/כדור) שלמדנו! <b>حبيب</b> (חַבִּיבּ) = אהוב. תחשוב: כל גרגר אהבה קטן ויקר. 'بحبّك' = הביטוי הכי חשוב בערבית.",
+    related:[
+      {ar:"حبيب", tl:"חַבִּיבּ", he:"אהוב / יקר"},
+      {ar:"عشق", tl:"עִשֵק", he:"אהבה עזה / חשק"}
+    ]
+  }
+,
+
+"مشي": {
+    translit:"מַשִי", trans:"הליכה / הלך",
+    emoji:"🚶",
+    morph:[
+      {ar:"مشي", tl:'<span class="root-m">מַשַא</span>', note:"בניין I — עבר: 'הוא הלך' / שם פעולה 'הליכה'"},
+      {ar:"بمشي", tl:'<span class="pre">בِ</span><span class="root-m">מְשِי</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → הולך'},
+      {ar:"مشيت", tl:'<span class="root-m">מַשֵ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → הלכתי'},
+      {ar:"إمشي!", tl:'<span class="pre">אِ</span><span class="root-m">מְשِי</span>', note:'תחילית <span class="pre">אِ־</span> = ציווי → לך! / זוז!'}
+    ],
+    examples:[
+      {ar:"مشينا عالبيت", tl:"מַשֵינַא עַ-(ל)בֵּית", he:"הלכנו הביתה"},
+      {ar:"بحبّ المشي", tl:"בַּחֵבّ אל-מַשִי", he:"אני אוהב ללכת / הליכה"}
+    ],
+    curio:"מהשורש م-ش-ي = הליכה. <b>ماشي</b> (מַאשִי) = 'בסדר/אוקיי' (מילולית 'הולך'!) — ביטוי נפוץ מאוד. תחשוב: הליכה איטית לעומת <b>ركض</b> (רַכַּד — ריצה).",
+    related:[
+      {ar:"ركض", tl:"רַכַّד", he:"רץ — מהיר יותר"},
+      {ar:"راح", tl:"רַאח", he:"הלך / נסע"}
+    ]
+  },
+
+  "قديم": {
+    translit:"קַדִים", trans:"ישן, עתיק",
+    emoji:"🏺",
+    morph:[
+      {ar:"قديم", tl:'<span class="root-m">קַדִים</span>', note:"שם תואר, ז': 'ישן / עתיק'"},
+      {ar:"قديمة", tl:'<span class="root-m">קַדִימ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → ישנה'},
+      {ar:"قدام", tl:'<span class="root-m">קֻדַّאם</span>', note:"ריבוי → ישנים / עתיקים"}
+    ],
+    examples:[
+      {ar:"بيت قديم", tl:"בֵּית קַדִים", he:"בית ישן"},
+      {ar:"من زمان قديم", tl:"מִן זַמַאן קַדִים", he:"מזמן עתיק"}
+    ],
+    curio:"מהשורש ق-د-م = קדמוּת/חזית (<b>قدّم</b> — קַדַّם — הגיש/הקדים; <b>قدّيم</b>). <u>קרוב לעברית</u> 'קדום/קדם'! תחשוב: עתיק = מ<u>ימי קדם</u>. ההפך מ-<b>جديد</b> (גְ'דִיד — חדש).",
+    related:[
+      {ar:"جديد", tl:"גְ'דִיד", he:"חדש — ההפך"},
+      {ar:"عتيق", tl:"עַתִיק", he:"עתיק (נרדף, קרוב לעברית)"}
+    ]
+  },
+
+  "طلب": {
+    translit:"טַלַבּ", trans:"הזמין, ביקש",
+    emoji:"🙋",
+    morph:[
+      {ar:"طلب", tl:'<span class="root-m">טַלַבּ</span>', note:"בניין I — עבר: 'הוא ביקש/הזמין' (הבסיס)"},
+      {ar:"بطلب", tl:'<span class="pre">בُ</span><span class="root-m">טְלֻבּ</span>', note:'תחילית <span class="pre">בُ־</span> = הווה → מבקש'},
+      {ar:"طلبت", tl:'<span class="root-m">טַלַבּ</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → ביקשתי / הזמנתי'},
+      {ar:"أطلب!", tl:'<span class="pre">أُ</span><span class="root-m">טْלֻבּ</span>', note:'תחילית <span class="pre">أُ־</span> = ציווי → בקש! / הזמן!'}
+    ],
+    examples:[
+      {ar:"طلبت قهوة", tl:"טַלַבְּת קַהְוֵה", he:"הזמנתי קפה"},
+      {ar:"بدّي أطلب منّك خدمة", tl:"בִּדִّי אֻטְלֻבּ מִנַّכּ חִ'דְמֵה", he:"אני רוצה לבקש ממך טובה"}
+    ],
+    curio:"מהשורש ط-ل-ب = בקשה/דרישה (<b>طالب</b> — טַאלֵבּ — סטודנט, מי ש<u>מבקש</u> ידע!; <b>مطلوب</b> — מַטְלוּבּ — מבוקש/דרוש). תחשוב: להזמין במסעדה = לבקש.",
+    related:[
+      {ar:"طالب", tl:"טַאלֵבּ", he:"סטודנט / מבקש"},
+      {ar:"سأل", tl:"סַאַל", he:"שאל — קרוב"}
+    ]
+  },
+
+  "سادة": {
+    translit:"סַאדַה", trans:"פשוט, ללא תוספות",
+    emoji:"⚪",
+    morph:[
+      {ar:"سادة", tl:'<span class="root-m">סַאדַה</span>', note:"שם תואר קבוע: 'פשוט / חלק / ללא תוספות' (לא משתנה)"},
+      {ar:"قهوة سادة", tl:'<span class="root-m">קַהְוֵה סַאדַה</span>', note:"ביטוי: 'קפה בלי סוכר'"}
+    ],
+    examples:[
+      {ar:"بشرب قهوة سادة", tl:"בַּשְרַבּ קַהְוֵה סַאדַה", he:"אני שותה קפה בלי סוכר"},
+      {ar:"قميص سادة بدون رسمات", tl:"קַמִיץ סַאדַה בִּדוֹן רַסְמַאת", he:"חולצה חלקה בלי ציורים"}
+    ],
+    curio:"<b>سادة</b> = פשוט/חלק/ללא קישוט. בקפה — בלי סוכר; בבד — בלי דוגמה. תחשוב: 'סַאדַה' = משהו <u>סתמי</u> וחלק, כמו לוח חלק. ההפך מ'מקושט' (زينة — זִינֵה).",
+    related:[
+      {ar:"بسيط", tl:"בַּסִיט", he:"פשוט (נרדף)"},
+      {ar:"عادي", tl:"עַאדִי", he:"רגיל / סטנדרטי"}
+    ]
+  },
+
+  "دايمًا": {
+    translit:"דַאִימַן", trans:"תמיד",
+    emoji:"♾️",
+    morph:[
+      {ar:"دايمًا", tl:'<span class="root-m">דַאִימ</span><span class="suf">ַן</span>', note:'סופית תנווין <span class="suf">ַן־</span> = תואר הפועל → "תמיד / באופן קבוע"'},
+      {ar:"دايم", tl:'<span class="root-m">דַאיֵם</span>', note:"שם תואר: 'קבוע / מתמיד'"},
+      {ar:"دام", tl:'<span class="root-m">דַאם</span>', note:"הפועל: 'נמשך / התקיים'"}
+    ],
+    examples:[
+      {ar:"دايمًا بتأخّر", tl:"דַאִימַן בִּתְאַחַّר", he:"הוא תמיד מאחר"},
+      {ar:"بحبّك دايمًا", tl:"בַּחֵבַّכּ דַאִימַן", he:"אני אוהב אותך תמיד"}
+    ],
+    curio:"מהשורש د-و-م = המשכיות/קביעות (<b>دام</b> — דַאם — נמשך; <b>على طول</b> נרדף). תחשוב: 'דַאִים' = משהו ש<u>מתמיד</u> ונמשך. הסיומת -ًا (תנווין) הופכת תואר לתואר-פועל.",
+    related:[
+      {ar:"طول الوقت", tl:"טוּל אל-וַקֵת", he:"כל הזמן (נרדף)"},
+      {ar:"أبدًا", tl:"אַבַּדַן", he:"אף פעם — ההפך"}
+    ]
+  },
+
+  "موّى": {
+    translit:"מַוַّא", trans:"יילל (חתול)",
+    emoji:"🐱",
+    morph:[
+      {ar:"موّى", tl:'<span class="root-m">מַוַّא</span>', note:"בניין II — עבר: 'יילל / עשה מיאו' (אונומטופיאה)"},
+      {ar:"بموّي", tl:'<span class="pre">בِ</span><span class="root-m">מַוِّי</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מיילל'},
+      {ar:"موّت", tl:'<span class="root-m">מַוַّ</span><span class="suf">ت</span>', note:'סופית <span class="suf">ت־</span> = עבר → ייללה'}
+    ],
+    examples:[
+      {ar:"القطّة عم تموّي", tl:"אל-קֻטַّה עַם תְמַוِّי", he:"החתולה מייללת (כרגע)"},
+      {ar:"موّى لمّا جاع", tl:"מַוַّא לַמַّא גַ'אע", he:"הוא יילל כשרעב"}
+    ],
+    curio:"מילה חיקוי-קול (אונומטופיאה) — מ'מיאו' (مواء — מֻוַאא')! בדיוק כמו ש'מיאו' בעברית מחקה את החתול. תחשוב: <b>موّى</b> = עשה 'מַוْ מַוْ'. קל לזכור כי זה נשמע כמו הקול עצמו.",
+    related:[
+      {ar:"قطّة", tl:"קֻטַّה", he:"חתולה"},
+      {ar:"نبح", tl:"נַבַּח", he:"נבח (כלב) — קול חיה אחר"}
+    ]
+  },
+
+  "ورا": {
+    translit:"וּרַא", trans:"מאחורי",
+    emoji:"🔙",
+    morph:[
+      {ar:"ورا", tl:'<span class="root-m">וּרַא</span>', note:"מילת יחס: 'מאחורי / אחרי'"},
+      {ar:"وراي", tl:'<span class="root-m">וַרַא</span><span class="suf">י</span>', note:'סופית <span class="suf">י־</span> = גוף 1 → מאחוריי'},
+      {ar:"وراه", tl:'<span class="root-m">וַרַא</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> = גוף 3 → מאחוריו'}
+    ],
+    examples:[
+      {ar:"السيّارة ورا البيت", tl:"א(ל)סַّيّארַה וּרַא אל-בֵּית", he:"המכונית מאחורי הבית"},
+      {ar:"تعا ورايي", tl:"תַעַא וַרַאיִי", he:"בוא אחריי"}
+    ],
+    curio:"<b>ورا</b> = מאחורי. ההפך מ-<b>قدّام</b> (קֻדַّאם — מלפנים). תחשוב: 'וּרַא' מזכיר 'אחורה'? משהו ש<u>נשאר מאחור</u>. מילת יחס יומיומית מאוד.",
+    related:[
+      {ar:"قدّام", tl:"קֻדַّאם", he:"מלפנים — ההפך"},
+      {ar:"بعد", tl:"בַּעְד", he:"אחרי (בזמן)"}
+    ]
+  },
+
+  "ضعيف": {
+    translit:"דְֿעִיף", trans:"חלש",
+    emoji:"🥀",
+    morph:[
+      {ar:"ضعيف", tl:'<span class="root-m">דְֿעִיף</span>', note:"שם תואר, ז': 'חלש'"},
+      {ar:"ضعيفة", tl:'<span class="root-m">דְֿעִיפ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → חלשה'},
+      {ar:"ضعفاء", tl:'<span class="root-m">דֻֿעַפַאא\'</span>', note:"ריבוי → חלשים"},
+      {ar:"ضعف", tl:'<span class="root-m">דַֿעֵף</span>', note:"הפועל: 'נחלש'"}
+    ],
+    examples:[
+      {ar:"حاسس حالي ضعيف", tl:"חַאסֵס חַאלִי דְֿעִיף", he:"אני מרגיש חלש"},
+      {ar:"الإشارة ضعيفة", tl:"אל-אִשַארַה דְֿעִיפֵה", he:"הקליטה חלשה"}
+    ],
+    curio:"מהשורש ض-ع-ف = חולשה/הכפלה (<b>ضعف</b> — דַֿעֵף — חולשה, אבל גם <b>ضِعف</b> — דִֿעְף — 'כפול'!). ההפך מ-<b>قوي</b> (קַוִי — חזק). ה-ضّ הגרוני נותן תחושת רכות.",
+    related:[
+      {ar:"قوي", tl:"קַוִי", he:"חזק — ההפך"},
+      {ar:"تعبان", tl:"תַעְבַּאן", he:"עייף / חולה"}
+    ]
+  },
+
+  "بيّن": {
+    translit:"בַּيַّן", trans:"נראה / הראה",
+    emoji:"👁️",
+    morph:[
+      {ar:"بيّن", tl:'<span class="root-m">בַّيַّן</span>', note:"בניין II — עבר: 'נראה / הסתבר / הראה' (הבסיס)"},
+      {ar:"بيبيّن", tl:'<span class="pre">בِيְ</span><span class="root-m">בَيِّן</span>', note:'תחילית <span class="pre">בِيְ־</span> = הווה גוף 3 → נראה'},
+      {ar:"بيّنت", tl:'<span class="root-m">בَيَّن</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → הראיתי / הסתבר לי'}
+    ],
+    examples:[
+      {ar:"بيّن عليه تعبان", tl:"בַّيַّן עַלֵיه תַעְבַּאן", he:"נראה עליו עייף"},
+      {ar:"بيّن إنّو صحّ", tl:"בַّيַّן אִנّוֹ צַחّ", he:"התברר שזה נכון"}
+    ],
+    curio:"מהשורש ب-ي-ن = הבחנה/בירור (<b>بين</b> — בֵּין — בין; <b>واضح/مبيّن</b>). <u>קרוב לעברית</u> 'בין' ו'הבין'! תחשוב: כשמשהו 'נראה' = הוא <u>ברור</u> ומובחן בין השאר.",
+    related:[
+      {ar:"باين", tl:"בַּאיֵן", he:"נראה / ניכר (תואר)"},
+      {ar:"ظهر", tl:"טַ'הַר", he:"הופיע / נראה"}
+    ]
+  },
+
+  "إنها": {
+    translit:"אִנַّהַא", trans:"שהיא",
+    emoji:"➰",
+    morph:[
+      {ar:"إنّ", tl:'<span class="root-m">אִנّ</span>', note:"מילית הדגשה/קישור: 'ש... / כי... / אכן'"},
+      {ar:"ها", tl:'<span class="suf">הַא</span>', note:'סופית כינוי <span class="suf">הַא־</span> = גוף 3 נקבה → היא'},
+      {ar:"إنّه", tl:'<span class="root-m">אِנّ</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> = גוף 3 ז\' → שהוא'},
+      {ar:"إنّك", tl:'<span class="root-m">אِنّ</span><span class="suf">ַכּ</span>', note:'סופית <span class="suf">ַכּ־</span> = גוף 2 → שאתה'}
+    ],
+    examples:[
+      {ar:"قال إنّها مريضة", tl:"קַאל אִנַّהַא מַרִידַֿה", he:"הוא אמר שהיא חולה"},
+      {ar:"بعرف إنّك صادق", tl:"בַּעְרֵף אִנַّכּ צַאדֵק", he:"אני יודע שאתה כן"}
+    ],
+    curio:"<b>إنّ</b> = 'ש' של משפט תוכן, מתחברת לכינוי: إنّها (שהיא), إنّه (שהוא), إنّك (שאתה). <u>קרוב לעברית</u> 'הִנֵّה' באותיות! תחשוב: 'אִנّ + הַא' = ש + היא.",
+    related:[
+      {ar:"إنّه", tl:"אִנّה", he:"שהוא"},
+      {ar:"أنّ", tl:"אַנّ", he:"ש־ (ספרותי)"}
+    ]
+  },
+
+  "جوعان": {
+    translit:"גֻ'ועַאן", trans:"רעב",
+    emoji:"🍴",
+    morph:[
+      {ar:"جوعان", tl:'<span class="root-m">גֻ\'ועַאן</span>', note:"שם תואר-מצב, ז': 'רעב'"},
+      {ar:"جوعانة", tl:'<span class="root-m">גֻ\'ועַאנ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → רעבה'},
+      {ar:"جاع", tl:'<span class="root-m">גַ\'אע</span>', note:"הפועל: 'רעב'"},
+      {ar:"جوع", tl:'<span class="root-m">גוּע</span>', note:"שם עצם: 'רעב'"}
+    ],
+    examples:[
+      {ar:"أنا جوعان كتير", tl:"אַנַא גֻ'ועַאן כְּתִיר", he:"אני מאוד רעב"},
+      {ar:"الولد جوعان", tl:"אל-וַלַד גֻ'ועַאן", he:"הילד רעב"}
+    ],
+    curio:"מהשורש ج-و-ع = רעב (<b>جوع</b> — גוּע — רעב). המשקל فعلان (-ַאן) משמש למצבים פיזיים: جوعان (רעב), <b>عطشان</b> (עַטְשַאן — צמא), <b>تعبان</b> (תַעְבַּאן — עייף). תבנית קלה לזיהוי!",
+    related:[
+      {ar:"عطشان", tl:"עַטְשַאן", he:"צמא — אותו משקל"},
+      {ar:"شبعان", tl:"שַבְּעַאן", he:"שבע — ההפך"}
+    ]
+  },
+
+  "دخّل": {
+    translit:"דַחַّ'ל", trans:"הכניס",
+    emoji:"📥",
+    morph:[
+      {ar:"دخّل", tl:'<span class="root-m">דַחַّ\'ל</span>', note:"בניין II — עבר: 'הכניס' (הבסיס)"},
+      {ar:"بدخّل", tl:'<span class="pre">בِ</span><span class="root-m">דַחֵّ\'ל</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מכניס'},
+      {ar:"دخّلت", tl:'<span class="root-m">דַחַّ\'ל</span><span class="suf">ْת</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → הכנסתי'},
+      {ar:"دخل", tl:'<span class="root-m">דַחַ\'ל</span>', note:"בניין I → 'נכנס' (בלי הכפלה)"}
+    ],
+    examples:[
+      {ar:"دخّل السيّارة عالكراج", tl:"דַחַّ'ל א(ל)סַّيّארַה עַ-(ל)כַּרַאז'", he:"הוא הכניס את המכונית למוסך"},
+      {ar:"دخّلني عالبيت", tl:"דַחֵّ'לְנِי עַ-(ל)בֵּית", he:"הכנס אותי הביתה"}
+    ],
+    curio:"מהשורש د-خ-ل = כניסה (<b>دخل</b> — דַחַ'ל — נכנס). ההכפלה (בניין II) הופכת 'נכנס' ל'הכניס' (גרם לכניסה). <b>مدخل</b> (מַדְחַ'ל) = כניסה (מקום). ההפך מ-<b>طلّع</b> (הוציא).",
+    related:[
+      {ar:"دخل", tl:"דַחַ'ל", he:"נכנס — בניין I"},
+      {ar:"طلّع", tl:"טַלַّע", he:"הוציא — ההפך"}
+    ]
+  },
+
+  "خلّى": {
+    translit:"חַ'לַّא", trans:"השאיר / נתן ל־",
+    emoji:"🤲",
+    morph:[
+      {ar:"خلّى", tl:'<span class="root-m">חַ\'לַّא</span>', note:"בניין II — עבר: 'השאיר / איפשר' (הבסיס)"},
+      {ar:"بخلّي", tl:'<span class="pre">בِ</span><span class="root-m">חַ\'לِّي</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → משאיר'},
+      {ar:"خلّيت", tl:'<span class="root-m">חַ\'לֵّ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → השארתי'},
+      {ar:"خلّيني", tl:'<span class="root-m">חַ\'לِّי</span><span class="suf">نِي</span>', note:'סופית <span class="suf">نِي־</span> = אותי → תן לי / עזוב אותי'}
+    ],
+    examples:[
+      {ar:"خلّيني أفكّر", tl:"חַ'לִّינِי אַפַכֵّר", he:"תן לי לחשוב"},
+      {ar:"خلّيت المفتاح بالبيت", tl:"חַ'לֵّית אל-מֻפְתַאח בִּל-בֵּית", he:"השארתי את המפתח בבית"}
+    ],
+    curio:"מהשורש خ-ل-و = ריקנות/השארה (<b>خالي</b> — חַ'אלִי — ריק/פנוי). <b>خلّى</b> = השאיר משהו 'פנוי' או נתן לו לקרות. הביטוי <b>خلّيك</b> (חַ'לִّיכּ) = 'תישאר/תהיה' — נפוץ מאוד.",
+    related:[
+      {ar:"ترك", tl:"תַרַכּ", he:"עזב / השאיר (ספרותי)"},
+      {ar:"سمح", tl:"סַמַח", he:"הרשה / איפשר"}
+    ]
+  },
+
+  "وافق": {
+    translit:"וַאפַק", trans:"הסכים",
+    emoji:"👍",
+    morph:[
+      {ar:"وافق", tl:'<span class="root-m">וַאפַק</span>', note:"בניין III — עבר: 'הסכים' (הבסיס)"},
+      {ar:"بوافق", tl:'<span class="pre">בِ</span><span class="root-m">וַאפֵק</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מסכים'},
+      {ar:"وافقت", tl:'<span class="root-m">וַאפַק</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → הסכמתי'},
+      {ar:"موافق", tl:'<span class="pre">מُ</span><span class="root-m">וַאפֵק</span>', note:'תחילית <span class="pre">מُ־</span> = שם פעול → מסכים (תואר)'}
+    ],
+    examples:[
+      {ar:"وافقت عالعرض", tl:"וַאפַקְת עַ-(ל)עַرְד", he:"הסכמתי להצעה"},
+      {ar:"أنا موافق", tl:"אַנַא מֻוַאפֵק", he:"אני מסכים"}
+    ],
+    curio:"מהשורש و-ف-ق = התאמה/הסכמה (<b>وفق</b> — וִפְק — בהתאם ל; <b>توفيق</b> — תַוְפִיק — הצלחה/התאמה, גם שם פרטי). תחשוב: להסכים = להיות ב<u>הסכמה והתאמה</u>.",
+    related:[
+      {ar:"قبل", tl:"קִבֵּל", he:"הסכים / קיבל"},
+      {ar:"رفض", tl:"רַפַד", he:"סירב — ההפך"}
+    ]
+  }
+,
+
+"دار باله": {
+    translit:"דַאר בַּאלוֹ", trans:"שם לב",
+    emoji:"⚠️",
+    morph:[
+      {ar:"دار", tl:'<span class="root-m">דַאר</span>', note:"בניין I (חלול) — 'סובב / כיוון'; כאן חלק מביטוי"},
+      {ar:"باله", tl:'<span class="root-m">בַּאל</span><span class="suf">ה</span>', note:'בّال = "מחשבה/תשומת לב" + סופית <span class="suf">ה־</span> שלו'},
+      {ar:"دير بالك", tl:'<span class="root-m">דִיר בַּאל</span><span class="suf">ַכּ</span>', note:'ציווי + <span class="suf">ַכּ־</span> שלך → "שים לב / היזהר!"'}
+    ],
+    examples:[
+      {ar:"دير بالك عالطريق", tl:"דִיר בַּאלַכּ עַ-(ל)טַّרִיק", he:"שים לב / היזהר בכביש"},
+      {ar:"ما دار باله عليّ", tl:"מַא דַאר בַּאלוֹ עַלَيّ", he:"הוא לא שם לב אליי"}
+    ],
+    curio:"ביטוי מילולי: 'הסובב את ה<u>בַּאל</u>' (= המחשבה/הראש) שלו. <b>بال</b> (בַּאל) = מחשבה/מצב רוח. <b>دير بالك</b> (דִיר בַּאלַכּ) = 'תסובב את ראשך' = שים לב! ביטוי יומיומי חשוב מאוד.",
+    related:[
+      {ar:"إنتبه", tl:"אִנְתַבַּה", he:"שים לב / היזהר (ספרותי)"},
+      {ar:"بال", tl:"בַּאל", he:"מחשבה / תשומת לב"}
+    ]
+  },
+
+  "نظف": {
+    translit:"נַטַّ'ף", trans:"ניקה",
+    emoji:"🧹",
+    morph:[
+      {ar:"نظّف", tl:'<span class="root-m">נַטַّ\'ף</span>', note:"בניין II — עבר: 'ניקה' (הבסיס)"},
+      {ar:"بنظّف", tl:'<span class="pre">בِ</span><span class="root-m">נַטֵّ\'ף</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → מנקה'},
+      {ar:"نظّفت", tl:'<span class="root-m">נַטַّ\'ף</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → ניקיתי'},
+      {ar:"نظيف", tl:'<span class="root-m">נַטִ\'יף</span>', note:"שם תואר → נקי"}
+    ],
+    examples:[
+      {ar:"نظّفت البيت", tl:"נַטַّ'פְת אל-בֵּית", he:"ניקיתי את הבית"},
+      {ar:"إيديك نظيفة؟", tl:"אִידֵיכּ נַטִ'יפֵה?", he:"הידיים שלך נקיות?"}
+    ],
+    curio:"מהשורש ن-ظ-ف = ניקיון (<b>نظيف</b> — נַטִ'יף — נקי; <b>نظافة</b> — נַטַ'אפֵה — ניקיון). ה-ظّ הגרוני. תחשוב: לנקות = לעשות <u>נַטִ'יף</u>. ההפך מ-<b>وسّخ</b> (וַסַّח' — ליכלך).",
+    related:[
+      {ar:"نظيف", tl:"נַטִ'יף", he:"נקי (תואר)"},
+      {ar:"وسّخ", tl:"וַסַّח'", he:"ליכלך — ההפך"}
+    ]
+  },
+
+  "سمّى": {
+    translit:"סַמַّא", trans:"כינה, העניק שם",
+    emoji:"🏷️",
+    morph:[
+      {ar:"سمّى", tl:'<span class="root-m">סַמַّא</span>', note:"בניין II — עבר: 'נתן שם / כינה' (הבסיס)"},
+      {ar:"بسمّي", tl:'<span class="pre">בِ</span><span class="root-m">סַמِّي</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → קורא בשם'},
+      {ar:"سمّيت", tl:'<span class="root-m">סַמֵّ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → קראתי (בשם)'},
+      {ar:"إسم", tl:'<span class="root-m">אِסֵם</span>', note:"שם עצם → שם"}
+    ],
+    examples:[
+      {ar:"سمّوا البنت ليلى", tl:"סַמّוּ אל-בִּנְת לֵילַא", he:"הם קראו לבת לילא"},
+      {ar:"شو إسمك؟", tl:"שוּ אִסְמַכּ?", he:"מה השם שלך?"}
+    ],
+    curio:"מהשורש س-م-و/س-م-ي = שם/רוממות (<b>إسم</b> — אִסֵם — שם; <b>سماء</b> — סַמַאא' — שמיים). <u>קרוב לעברית</u> 'שם' ו'שמיים'! תחשוב: לתת שם = להרים משהו ולקרוא לו.",
+    related:[
+      {ar:"إسم", tl:"אִסֵם", he:"שם — קרוב לעברית"},
+      {ar:"لقّب", tl:"לַקַّבּ", he:"כינה / נתן תואר"}
+    ]
+  },
+
+  "لعب": {
+    translit:"לִעֵבּ", trans:"שיחק",
+    emoji:"⚽",
+    morph:[
+      {ar:"لعب", tl:'<span class="root-m">לִעֵבּ</span>', note:"בניין I — עבר: 'הוא שיחק' (הבסיס)"},
+      {ar:"بلعب", tl:'<span class="pre">בِ</span><span class="root-m">לְעַבּ</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → משחק'},
+      {ar:"لعبت", tl:'<span class="root-m">לִעֵבּ</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → שיחקתי'},
+      {ar:"لعبة", tl:'<span class="root-m">לֻעְבּ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> → משחק (שם עצם)'}
+    ],
+    examples:[
+      {ar:"الولاد عم يلعبوا", tl:"אל-וְלַאד עַם יִלְעַבּוּ", he:"הילדים משחקים (כרגע)"},
+      {ar:"لعبنا كرة قدم", tl:"לִעֵבְּנַא כֻּרַת קַדַם", he:"שיחקנו כדורגל"}
+    ],
+    curio:"מהשורש ل-ع-ب = משחק (<b>لعبة</b> — לֻעְבֵּה — משחק/צעצוע; <b>ملعب</b> — מַלְעַבּ — מגרש). תחשוב: ה-ع הגרוני באמצע. 'لعّاب' (לַעַّאבּ) = שחקן. נפוץ מאוד בהקשר ספורט וילדים.",
+    related:[
+      {ar:"لعبة", tl:"לֻעְבֵּה", he:"משחק / צעצוע"},
+      {ar:"ملعب", tl:"מַלְעַבּ", he:"מגרש"}
+    ]
+  },
+
+  "رزان": {
+    translit:"רַזַאן", trans:"רזאן (שם פרטי)",
+    emoji:"🙋‍♀️",
+    morph:[
+      {ar:"رزان", tl:'<span class="root-m">רַזַאן</span>', note:"שם פרטי נשי — מהשורש ر-ز-ن = מתינות/כובד-ראש"},
+      {ar:"رزين", tl:'<span class="root-m">רַזִין</span>', note:"שם תואר קרוב → מיושב / רגוע"}
+    ],
+    examples:[
+      {ar:"رزان صاحبتي", tl:"רַזַאן צַאחְבְּתִי", he:"רזאן היא החברה שלי"},
+      {ar:"رزان بنت لطيفة", tl:"רַזַאן בִּנְת לַטִיפֵה", he:"רזאן בחורה נחמדה"}
+    ],
+    curio:"שם פרטי נשי נפוץ. מהשורש ر-ز-ن = מתינות וכובד-ראש (<b>رزين</b> — רַזִין — מיושב, שקול). תחשוב: השם 'רַזַאן' נושא משמעות של אישה <u>רגועה ומיושבת</u>.",
+    related:[
+      {ar:"رزين", tl:"רַזִין", he:"מיושב / שקול"},
+      {ar:"هادئ", tl:"הַאדِא'", he:"רגוע / שקט"}
+    ]
+  },
+
+  "جنينة": {
+    translit:"גְ'נֵינֵה", trans:"גן",
+    emoji:"🌳",
+    morph:[
+      {ar:"جنينة", tl:'<span class="root-m">גְ\'נֵינ</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> (ة) → גן אחד (הקטנה של جنّة)'},
+      {ar:"جنّة", tl:'<span class="root-m">גַ\'נֵّה</span>', note:"שם עצם → גן עדן / פרדס"},
+      {ar:"جناين", tl:'<span class="root-m">גַ\'נַאיֵן</span>', note:"ריבוי → גנים"}
+    ],
+    examples:[
+      {ar:"قعدنا بالجنينة", tl:"קַעַדְנַא בִּל-גְ'נֵינֵה", he:"ישבנו בגן"},
+      {ar:"الجنينة مليانة ورد", tl:"אל-גְ'נֵינֵה מַלְיַאנֵה וַרְד", he:"הגן מלא ורדים"}
+    ],
+    curio:"מהשורש ج-ن-ن = הסתרה/כיסוי (<b>جنّة</b> — גַ'נֵّה — גן עדן; <b>مجنون</b> — מַגְ'נוּן — משוגע, מי ש'מכוסה' בדעתו!). <u>קרוב לעברית</u> 'גן'! גַ'נֵّה = גן מוקף ומוסתר.",
+    related:[
+      {ar:"حديقة", tl:"חַדִיקַה", he:"גן / פארק (ספרותי)"},
+      {ar:"بستان", tl:"בֻּסְתַאן", he:"בוסתן / פרדס"}
+    ]
+  },
+
+  "دافي": {
+    translit:"דַאפִי", trans:"חמים",
+    emoji:"🔥",
+    morph:[
+      {ar:"دافي", tl:'<span class="root-m">דַאפִי</span>', note:"שם תואר, ז': 'חמים' (מדובר; ספרותי: دافئ)"},
+      {ar:"دافية", tl:'<span class="root-m">דַאפְי</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → חמימה'},
+      {ar:"دفا", tl:'<span class="root-m">דַפַא</span>', note:"שם עצם → חום / חמימות"}
+    ],
+    examples:[
+      {ar:"الجو دافي اليوم", tl:"אל-גַّו דַאפִי אל-יוֹם", he:"מזג האוויר חמים היום"},
+      {ar:"بدّي شي دافي", tl:"בִּדِّי שִי דַאפِי", he:"אני רוצה משהו חמים"}
+    ],
+    curio:"מהשורש د-ف-أ = חום (<b>دفا</b> — דַפַא — חמימות; <b>دفّاية</b> — דַפַّאיֵה — תנור חימום!). תחשוב: 'דַאפִי' = נעים וחמים, לא לוהט. בין 'بارد' (בַּארֵד — קר) ל'سخن' (סֻחְ'ן — חם מאוד).",
+    related:[
+      {ar:"بارد", tl:"בַּארֵד", he:"קר — ההפך"},
+      {ar:"سخن", tl:"סֻחְ'ן", he:"חם (מאוד)"}
+    ]
+  },
+
+  "زهرة": {
+    translit:"זַהְרַה", trans:"פרח",
+    emoji:"🌸",
+    morph:[
+      {ar:"زهرة", tl:'<span class="root-m">זַהְר</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> (ة) → פרח אחד'},
+      {ar:"زهر", tl:'<span class="root-m">זַהֵר</span>', note:"שם קיבוצי → פריחה / פרחים"},
+      {ar:"زهور", tl:'<span class="root-m">זֻהוּר</span>', note:"ריבוי → פרחים"}
+    ],
+    examples:[
+      {ar:"قطفت زهرة", tl:"קַטַפְת זַהְרַה", he:"קטפתי פרח"},
+      {ar:"الزهور ريحتها حلوة", tl:"א(ל)זֻّהוּר רִיחֵתְהַא חֵלְוֵה", he:"לפרחים ריח טוב"}
+    ],
+    curio:"מהשורש ز-ه-ر = פריחה/זוהר (<b>أزهر</b> — אַזְהַר — פרח/זרח). 'الأزهر' (אל-אַזְהַר) = שם האוניברסיטה המפורסמת בקהיר! תחשוב: פרח = משהו ש<u>זוהר</u> ופורח.",
+    related:[
+      {ar:"ورد", tl:"וַרְד", he:"ורדים / פרחים"},
+      {ar:"وردة", tl:"וַרְדֵה", he:"ורד אחד"}
+    ]
+  },
+
+  "جوري": {
+    translit:"גّ'וּרִי", trans:"ורד אדום",
+    emoji:"🌹",
+    morph:[
+      {ar:"جوري", tl:'<span class="root-m">גّ\'וּרִי</span>', note:"שם תואר: 'ורד דמשקאי אדום' (ورد جوري)"},
+      {ar:"ورد جوري", tl:'<span class="root-m">וַרְד גّ\'וּרִי</span>', note:"ביטוי קבוע → ורד אדום קלאסי"}
+    ],
+    examples:[
+      {ar:"باقة ورد جوري", tl:"בַּאקַת וַרְד גّ'וּרִי", he:"זר ורדים אדומים"},
+      {ar:"الجوري أحمر", tl:"אל-גّ'וּרִי אַחְמַר", he:"הג'ורי אדום"}
+    ],
+    curio:"<b>جوري</b> מקור השם מהעיר 'جور' (גّ'וּר) בפרס — מקור הוורד הזה! ورد جوري (וַרְד גّ'וּרִי) = הוורד הדמשקאי האדום הקלאסי. תחשוב: סוג ורד מיוחד, לא סתם 'ورد' (וַרְד).",
+    related:[
+      {ar:"وردة", tl:"וַרְדֵה", he:"ורד (כללי)"},
+      {ar:"أحمر", tl:"אַחְמַר", he:"אדום — הצבע שלו"}
+    ]
+  },
+
+  "مرمية": {
+    translit:"מַרַמִיֵّה", trans:"מרווה (צמח)",
+    emoji:"🌿",
+    morph:[
+      {ar:"مرمية", tl:'<span class="root-m">מַרַמִיֵّ</span><span class="suf">ה</span>', note:"שם עצם נקבה: 'מרווה' (עשב תיבול/תה)"},
+      {ar:"شاي مرمية", tl:'<span class="root-m">שַאי מַרַמִיֵّה</span>', note:"ביטוי → תה מרווה"}
+    ],
+    examples:[
+      {ar:"بشرب شاي مع مرمية", tl:"בַּשְרַבּ שַאי מַע מַרַמִיֵّה", he:"אני שותה תה עם מרווה"},
+      {ar:"المرمية بتريّح المعدة", tl:"אל-מַרַמִיֵّה בִּתְרַيّח אל-מַעְדֵה", he:"המרווה מרגיעה את הבטן"}
+    ],
+    curio:"<b>مرمية</b> (מַרַמִיֵّה) = מרווה, עשב תיבול ארומטי שמוסיפים לתה ולקפה בלבנט. <u>קרוב לעברית</u> 'מרווה'! תחשוב: צמח ריחני שמרגיע. נפוץ מאוד בתה הערבי.",
+    related:[
+      {ar:"زعتر", tl:"זַעְתַר", he:"זעתר — עשב נפוץ אחר"},
+      {ar:"نعنع", tl:"נַעְנַע", he:"נענע — לתה גם כן"}
+    ]
+  },
+
+  "غنّى": {
+    translit:"עַ'נַّא", trans:"שר",
+    emoji:"🎤",
+    morph:[
+      {ar:"غنّى", tl:'<span class="root-m">עַ\'נַّא</span>', note:"בניין II — עבר: 'הוא שר' (הבסיס)"},
+      {ar:"بغنّي", tl:'<span class="pre">בِ</span><span class="root-m">עַ\'נِّي</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → שר'},
+      {ar:"غنّيت", tl:'<span class="root-m">עַ\'נֵّ</span><span class="suf">ית</span>', note:'סופית <span class="suf">ית־</span> = עבר גוף 1 → שרתי'},
+      {ar:"أغنية", tl:'<span class="root-m">אֻעְ\'נِיֵّה</span>', note:"שם עצם → שיר"}
+    ],
+    examples:[
+      {ar:"غنّى أغنية حلوة", tl:"עַ'נַّא אֻעְ'נִיֵّה חֵלְוֵה", he:"הוא שר שיר יפה"},
+      {ar:"بحبّ غنّي بالسيّارة", tl:"בַּחֵבّ עַ'נِّي בِ(ל)סَّيّארَה", he:"אני אוהב לשיר במכונית"}
+    ],
+    curio:"מהשורש غ-ن-ي = שירה/עושר (<b>أغنية</b> — אֻעְ'נִיֵّה — שיר; <b>مغنّي</b> — מֻעַ'נّی — זמר). ה-غ הגרוני בהתחלה. תחשוב: לשיר = למלא את האוויר ב<u>עושר</u> צליל.",
+    related:[
+      {ar:"أغنية", tl:"אֻעְ'נِיֵّה", he:"שיר"},
+      {ar:"مغنّي", tl:"מֻעַ'נّי", he:"זמר"}
+    ]
+  },
+
+  "واطي": {
+    translit:"וַאטִי", trans:"שקט / נמוך",
+    emoji:"🔉",
+    morph:[
+      {ar:"واطي", tl:'<span class="root-m">וַאטִי</span>', note:"שם תואר: 'נמוך' (קול שקט או גובה נמוך)"},
+      {ar:"واطية", tl:'<span class="root-m">וַאטְי</span><span class="suf">ֵה</span>', note:'סופית <span class="suf">ֵה־</span> = נקבה → נמוכה'},
+      {ar:"وطّى", tl:'<span class="root-m">וַטַّא</span>', note:"הפועל: 'הנמיך / החליש (קול)'"}
+    ],
+    examples:[
+      {ar:"صوتك واطي", tl:"צוֹתַכּ וַאטִי", he:"הקול שלך שקט"},
+      {ar:"وطّي الراديو", tl:"וַטِّי א(ל)רַّאדְיוֹ", he:"תנמיך את הרדיו"}
+    ],
+    curio:"מהשורש و-ط-ء = נמיכות (<b>واطئ</b>). שונה מ<b>هادئ</b> (הַאדِא' — רגוע). תחשוב: 'וַאטִי' = נמוך/חלש — גם בגובה וגם בעוצמת קול. ההפך מ-<b>عالي</b> (עַאלִי — גבוה/חזק).",
+    related:[
+      {ar:"عالي", tl:"עַאלִי", he:"גבוה / חזק — ההפך"},
+      {ar:"هادئ", tl:"הַאדِא'", he:"רגוע / שקט"}
+    ]
+  },
+
+  "عصفور": {
+    translit:"עַצְפוּר", trans:"ציפור",
+    emoji:"🐦",
+    morph:[
+      {ar:"عصفور", tl:'<span class="root-m">עַצְפוּר</span>', note:"שם עצם, ז': 'ציפור / דרור'"},
+      {ar:"عصفورة", tl:'<span class="root-m">עַצְפוּר</span><span class="suf">ה</span>', note:'סופית <span class="suf">ה־</span> = נקבה → ציפורה'},
+      {ar:"عصافير", tl:'<span class="root-m">עַצַאפִיר</span>', note:"ריבוי שבור → ציפורים"}
+    ],
+    examples:[
+      {ar:"العصفور عم يغنّي", tl:"אל-עַצְפוּר עַם יְעַ'נّי", he:"הציפור שרה (כרגע)"},
+      {ar:"شفت عصافير عالشجرة", tl:"שֻפְת עַצַאפִיר עַ-(ל)שַّגַ'רַה", he:"ראיתי ציפורים על העץ"}
+    ],
+    curio:"<b>عصفور</b> (עַצְפוּר) = ציפור קטנה/דרור. <u>קרוב לעברית</u> 'צִפּוֹר'! (צ-פ-ר). תחשוב: 'עַצְפוּר' = ציפור עם ع גרוני בהתחלה. ריבוי 'عصافير' (עַצַאפִיר) שכיח מאוד.",
+    related:[
+      {ar:"طير", tl:"טֵיר", he:"עוף / ציפור (כללי)"},
+      {ar:"حمامة", tl:"חַמַאמֵה", he:"יונה"}
+    ]
+  },
+
+  "طار": {
+    translit:"טַאר", trans:"עף",
+    emoji:"🕊️",
+    morph:[
+      {ar:"طار", tl:'<span class="root-m">טַאר</span>', note:"בניין I (חלול) — עבר: 'הוא עף' (הבסיס)"},
+      {ar:"بطير", tl:'<span class="pre">בِ</span><span class="root-m">טِיר</span>', note:'תחילית <span class="pre">בِ־</span> = הווה → עף'},
+      {ar:"طرت", tl:'<span class="root-m">טִר</span><span class="suf">ْت</span>', note:'סופית <span class="suf">ْת־</span> = עבר גוף 1 → עפתי (התנועה משתנה!)'},
+      {ar:"طيّارة", tl:'<span class="root-m">טַيّארَה</span>', note:"שם עצם → מטוס (מה שעף)"}
+    ],
+    examples:[
+      {ar:"العصفور طار", tl:"אל-עַצְפוּר טַאר", he:"הציפור עפה"},
+      {ar:"الطيّارة بتطير عالي", tl:"א(ל)טַّيّארَה בּِתְטِיר עַאלِי", he:"המטוס עף גבוה"}
+    ],
+    curio:"מהשורש ط-ي-ر = תעופה (<b>طير</b> — טֵיר — עוף; <b>طيّارة</b> — טַיّארَה — מטוס; <b>مطار</b> — מַטַאר — שדה תעופה!). פועל חלול. תחשוב: כל מה שקשור לעופף — מאותו שורש.",
+    related:[
+      {ar:"طيّارة", tl:"טַيّارَה", he:"מטוס"},
+      {ar:"عصفور", tl:"עַצְפוּר", he:"ציפור — מי שעף"}
+    ]
+  },
+
+  "حواليها": {
+    translit:"חַוַאלֵיהַא", trans:"סביבה",
+    emoji:"🔄",
+    morph:[
+      {ar:"حوالي", tl:'<span class="root-m">חַוַאלִי</span>', note:"מילת יחס: 'סביב / בערך'"},
+      {ar:"ها", tl:'<span class="suf">הַא</span>', note:'סופית כינוי <span class="suf">הַא־</span> = גוף 3 נקבה → סביבה (שלה)'},
+      {ar:"حواليه", tl:'<span class="root-m">חַוַאלֵי</span><span class="suf">ه</span>', note:'סופית <span class="suf">ه־</span> = גוף 3 ז\' → סביבו'}
+    ],
+    examples:[
+      {ar:"تطلّعت حواليها", tl:"תְטַלַّעְת חַוַאלֵיהַא", he:"היא הסתכלה סביבה"},
+      {ar:"في ناس كتير حواليه", tl:"פִי נַאס כְּתִיר חַוַאלֵיה", he:"יש הרבה אנשים סביבו"}
+    ],
+    curio:"מהשורש ح-و-ل = סיבוב/שינוי (אותו שורש כמו <b>حوّل</b> — חַוַّל — הפך/שינה, ו<b>حاول</b> — חַאוַל — ניסה!). <b>حوالي</b> = גם 'בערך'. תחשוב: מה ש<u>מקיף</u> וסובב משהו.",
+    related:[
+      {ar:"حول", tl:"חַוְל", he:"סביב (שורש)"},
+      {ar:"جنب", tl:"גַ'נְבּ", he:"ליד / לצד"}
+    ]
+  },
+
+  "عم": {
+    translit:"עַם", trans:"(סימן הווה מתמשך)",
+    emoji:"⏯️",
+    morph:[
+      {ar:"عم", tl:'<span class="pre">עַם</span>', note:"חלקיק לפני פועל הווה → מציין פעולה מתמשכת 'כרגע'"},
+      {ar:"عم بشتغل", tl:'<span class="pre">עַם</span> <span class="root-m">בִּשְתֵעֵ\'ל</span>', note:"עם + הווה → 'אני עובד כרגע' (ממש עכשיו)"},
+      {ar:"عم ياكل", tl:'<span class="pre">עַם</span> <span class="root-m">יַאכֻּל</span>', note:"עם + הווה גוף 3 → 'הוא אוכל עכשיו'"}
+    ],
+    examples:[
+      {ar:"عم بدرس هلّق", tl:"עַם בַּדְרֻס הַלַّק", he:"אני לומד עכשיו (ממש כרגע)"},
+      {ar:"شو عم تعمل؟", tl:"שוּ עַם תַעְמֵל?", he:"מה אתה עושה (כרגע)?"}
+    ],
+    curio:"<b>عم</b> (עַם) הוא סימן ההווה המתמשך בלהג הלבנטיני — כמו '-ing' באנגלית. בלי 'עם' = הרגל ('אני שותה קפה'); עם 'עם' = ממש עכשיו ('עם בשרב' = אני שותה כרגע). אחת המילים החשובות לדיבור!",
+    related:[
+      {ar:"هلّق", tl:"הַלַّק", he:"עכשיו — מחזק את ההווה"},
+      {ar:"بـ", tl:"בִּ־", he:"תחילית הווה (להרגל)"}
+    ]
+  }
+
+};
+
+/* =========================================================
+   מנוע הרינדור — אל תיגע, זה רק מציג את המאגר.
+   ========================================================= */
+function cardHTML(key, d, idx){
+  const morph = d.morph.map(m=>`
+    <div class="mchip">
+      <div class="m-ar">${m.ar}</div>
+      <div class="m-tl">${m.tl}</div>
+      <div class="m-note">${m.note}</div>
+    </div>`).join("");
+  const ex = d.examples.map(e=>`
+    <li>
+      <div class="ex-head">
+        <div class="ar">${e.ar}</div>
+        <button class="spk spk-sm" type="button" title="השמע" data-say="${attr(e.ar)}">🔊</button>
+      </div>
+      <div class="tl">${e.tl}</div>
+      <div class="he">${e.he}</div>
+    </li>`).join("");
+  const rel = d.related.map(r=>`
+    <span class="chip">${r.ar} · ${r.tl}<small>${r.he}</small></span>`).join("");
+  // real photo (if placed in the images folder) with emoji fallback.
+  // Both are rendered; the emoji is hidden unless the image fails to load.
+  const fallback = d.emoji ? `<span class="illus-emoji">${d.emoji}</span>` : "";
+  let illus = "";
+  if(d.pic){
+    illus = `<div class="wc-illus">
+      <img src="${IMG_DIR}${attr(d.pic)}" alt="" loading="lazy"
+           onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.style.display='flex';">
+      <span class="illus-fallback" style="display:none">${fallback}</span>
+    </div>`;
+  } else if(fallback){
+    illus = `<div class="wc-illus"><span class="illus-fallback" style="display:flex">${fallback}</span></div>`;
+  }
+  return `
+  <article class="word-card" id="card-${idx}">
+    <div class="wc-trans-row">
+      <span class="lbl">תרגום</span>
+      ${d.trans}
+    </div>
+    <div class="wc-head">
+      <div>
+        <div class="wc-ar">${key} <button class="spk" type="button" title="השמע" data-say="${attr(key)}">🔊</button></div>
+        <div class="wc-translit">${d.translit}</div>
+      </div>
+      ${illus}
+    </div>
+    <div class="wc-tools">
+      <button class="reveal-btn" type="button" onclick="toggleReveal(${idx})">
+        <span class="eye">👁</span><span class="rv-label">חשוף</span>
+      </button>
+      <span class="mode-tag" id="mode-${idx}">ערבית ← תרגום</span>
+      <button class="flip-btn" type="button" onclick="flipCard(${idx})">⇄ הפוך כיוון</button>
+    </div>
+    <div class="wc-body">
+      <div class="block">
+        <div class="label">פירוק: גוף · זמן · תחיליות וסופיות</div>
+        <div class="affix-key">
+          <span><i style="background:#2f7d8c"></i> תחילית (זמן/אופן)</span>
+          <span><i style="background:#a8447e"></i> סופית (גוף/ריבוי/שייכות)</span>
+          <span><i style="background:#1f1b16"></i> שורש / גזע</span>
+        </div>
+        <div class="morph">${morph}</div>
+      </div>
+      <div class="block">
+        <div class="label">דוגמאות בהטיות</div>
+        <ul class="examples">${ex}</ul>
+      </div>
+      <div class="block">
+        <div class="curio">
+          <div class="label">קוריוז על השורש</div>
+          <p>${d.curio}</p>
+        </div>
+      </div>
+      <div class="block related">
+        <div class="label">מילים קרובות</div>
+        <div class="morph">${rel}</div>
+      </div>
+    </div>
+  </article>`;
+}
+
+/* ---- Text-to-speech (Web Speech API, no internet/files needed) ---- */
+function attr(s){
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/\n/g," ");
+}
+
+let arVoice = null, voicesReady = false;
+function pickArabicVoice(){
+  if(!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  voicesReady = vs.length > 0;
+  arVoice = vs.find(v=>/ar[-_](PS|JO|LB|SY)/i.test(v.lang))
+         || vs.find(v=>/^ar\b/i.test(v.lang) || /arabic/i.test(v.name))
+         || null;
+}
+if('speechSynthesis' in window){
+  pickArabicVoice();
+  speechSynthesis.onvoiceschanged = pickArabicVoice;
+}
+
+function speak(text, btn){
+  if(!('speechSynthesis' in window)){ flashWarn(btn,"הדפדפן לא תומך בהקראה"); return; }
+  if(!voicesReady) pickArabicVoice();
+  try{ speechSynthesis.cancel(); }catch(e){}
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = arVoice ? arVoice.lang : "ar";
+  if(arVoice) u.voice = arVoice;
+  u.rate = 0.85;
+  if(!arVoice) flashWarn(btn,"לא נמצא קול ערבי במכשיר — מומלץ להוסיף בהגדרות השפה");
+  document.querySelectorAll(".spk.speaking").forEach(b=>b.classList.remove("speaking"));
+  if(btn) btn.classList.add("speaking");
+  u.onend = ()=>{ if(btn) btn.classList.remove("speaking"); };
+  u.onerror = ()=>{ if(btn) btn.classList.remove("speaking"); };
+  try{ speechSynthesis.speak(u); }
+  catch(e){ if(btn) btn.classList.remove("speaking"); flashWarn(btn,"ההקראה נכשלה במכשיר הזה"); }
+}
+function flashWarn(btn,msg){
+  const card = btn ? btn.closest(".word-card") : null;
+  if(!card) return;
+  let w = card.querySelector(".tts-warn");
+  if(!w){ w=document.createElement("div"); w.className="tts-warn"; card.querySelector(".wc-tools").after(w); }
+  w.textContent = "🔇 "+msg;
+  w.style.display="block";
+}
+/* one delegated listener handles every speaker button safely */
+document.addEventListener("click", function(ev){
+  var t = ev.target;
+  // iOS Safari: ev.target can be a text node / SVG element without .closest
+  if(t && typeof t.closest !== "function" && t.parentElement) t = t.parentElement;
+  if(!t || typeof t.closest !== "function") return;
+  const b = t.closest(".spk");
+  if(!b) return;
+  const text = b.getAttribute("data-say");
+  if(text) speak(text, b);
+});
+
+function toggleReveal(idx){
+  const card = document.getElementById("card-"+idx);
+  card.classList.toggle("revealed");
+  const btn = card.querySelector(".reveal-btn");
+  const lbl = card.querySelector(".rv-label");
+  if(card.classList.contains("revealed")){ btn.classList.add("open"); lbl.textContent="הסתר"; }
+  else { btn.classList.remove("open"); lbl.textContent="חשוף"; }
+}
+
+function flipCard(idx){
+  const card = document.getElementById("card-"+idx);
+  card.classList.toggle("flipped");
+  card.classList.remove("revealed");
+  const btn = card.querySelector(".reveal-btn");
+  card.querySelector(".rv-label").textContent="חשוף";
+  btn.classList.remove("open");
+  const tag = document.getElementById("mode-"+idx);
+  const transLbl = card.querySelector(".wc-trans-row .lbl");
+  if(card.classList.contains("flipped")){
+    tag.textContent = "תרגום ← ערבית";
+    transLbl.textContent = "תרגום — נסה להיזכר בערבית";
+  } else {
+    tag.textContent = "ערבית ← תרגום";
+    transLbl.textContent = "תרגום";
+  }
+}
+
+function normalize(s){
+  return s.replace(/[\u064B-\u0652]/g,"").trim();
+}
+
+function build(){
+  const raw = document.getElementById("input").value;
+  const deck = document.getElementById("deck");
+  if(!raw.trim()){ deck.innerHTML = emptyState(); updateCount(0,0); return; }
+
+  // קבל שורות; אם יש פסיקים — קח את החלק הראשון (המילה הערבית)
+  const lines = raw.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  const words = lines.map(l => l.split(/[,،]/)[0].trim()).filter(Boolean);
+
+  let html = "", found = 0;
+  const missing = [];
+  const loaded = [];
+  words.forEach(w=>{
+    let entry = LEXICON[w];
+    if(!entry){
+      // ניסיון התאמה ללא ניקוד
+      const nw = normalize(w);
+      const k = Object.keys(LEXICON).find(key=>normalize(key)===nw);
+      if(k) entry = LEXICON[k], w=k;
+    }
+    if(entry){ html += cardHTML(w, entry, found); loaded.push(w); found++; }
+    else missing.push(w);
+  });
+
+  LOADED_WORDS = loaded;
+  const rb = document.getElementById("reviewBtn");
+  rb.disabled = loaded.length === 0;
+  rb.querySelector("span").textContent = loaded.length ? `התחל שינון (${loaded.length})` : "התחל שינון";
+
+  if(missing.length){
+    html += `<div class="empty" style="text-align:right;direction:rtl;">
+      <span class="big">؟</span>
+      המילים הבאות עדיין לא במאגר: <b>${missing.join("، ")}</b>.<br>
+      תן לי אותן בצ'אט ואני אוסיף להן כרטיס מלא.
+    </div>`;
+  }
+  deck.innerHTML = html || emptyState();
+  updateCount(found, words.length);
+}
+
+function emptyState(){
+  return `<div class="empty"><span class="big">ابدأ</span>הדבק מילים למעלה כדי לבנות את ערכת הלימוד שלך.</div>`;
+}
+function updateCount(found,total){
+  const c = document.getElementById("count");
+  c.textContent = total ? `${found} מתוך ${total} מילים נטענו` : "";
+}
+function clearAll(){
+  document.getElementById("input").value="";
+  document.getElementById("deck").innerHTML=emptyState();
+  updateCount(0,0);
+  LOADED_WORDS = [];
+  const rb = document.getElementById("reviewBtn");
+  rb.disabled = true;
+  rb.querySelector("span").textContent = "התחל שינון";
+}
+
+/* =========================================================
+   מוד שינון — spaced-recall over loaded words
+   ========================================================= */
+let LOADED_WORDS = [];
+let RV = null;  // review session state
+
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startReview(){
+  if(!LOADED_WORDS.length) return;
+  // remember the study direction currently chosen on the first deck card (default ar->he)
+  const firstCard = document.querySelector("#deck .word-card");
+  const flipped = firstCard ? firstCard.classList.contains("flipped") : false;
+  RV = {
+    queue: shuffle(LOADED_WORDS),
+    total: LOADED_WORDS.length,
+    done: 0,
+    round: 1,
+    flipped,
+    tries: {},
+    passSize: LOADED_WORDS.length,
+    passSeen: 0,
+    nextRound: []
+  };
+  LOADED_WORDS.forEach(w=>RV.tries[w]=0);
+  document.body.classList.add("review-active");
+  document.getElementById("reviewOverlay").classList.add("on");
+  nextReviewCard();
+}
+
+function endReview(){
+  RV = null;
+  document.body.classList.remove("review-active");
+  const ov = document.getElementById("reviewOverlay");
+  ov.classList.remove("on");
+  document.getElementById("rvBody").innerHTML = "";
+  try{ speechSynthesis.cancel(); }catch(e){}
+}
+
+function updateRvStats(){
+  document.getElementById("rvLeft").textContent = RV.queue.length;
+  document.getElementById("rvDone").textContent = RV.done;
+  document.getElementById("rvRound").textContent = RV.round;
+  const pct = RV.total ? Math.round((RV.done/RV.total)*100) : 0;
+  document.getElementById("rvFill").style.width = pct + "%";
+}
+
+function nextReviewCard(){
+  if(!RV) return;
+  if(RV.queue.length === 0){ return reviewSummary(); }
+  updateRvStats();
+  const word = RV.queue[0];
+  RV.tries[word]++;
+  const d = LEXICON[word] || (function(){
+    const nw = normalize(word);
+    const k = Object.keys(LEXICON).find(key=>normalize(key)===nw);
+    return k ? LEXICON[k] : null;
+  })();
+  if(!d){ RV.queue.shift(); return nextReviewCard(); }
+
+  const card = cardHTML(word, d, "rv");
+  document.getElementById("rvBody").innerHTML = `
+    <div class="rv-card-slot">
+      <div class="rv-actions" id="rvActions">
+        <button class="rv-no" onclick="recall(false)">לא זכרתי<small>נחזור אליה</small></button>
+        <button class="rv-yes" onclick="recall(true)">זכרתי<small>יורדת מהרשימה</small></button>
+      </div>
+      <div class="rv-reveal-hint" id="rvHint">מכיר? סמן ישר. לא בטוח? לחץ “חשוף” לבדוק.</div>
+      ${card}
+    </div>`;
+  // apply chosen direction
+  const c = document.getElementById("card-rv");
+  if(RV.flipped){
+    c.classList.add("flipped");
+    c.querySelector(".wc-trans-row .lbl").textContent = "תרגום — נסה להיזכר בערבית";
+    const tag = document.getElementById("mode-rv"); if(tag) tag.textContent = "תרגום ← ערבית";
+  }
+  // hide the in-card flip button inside review (direction is fixed per session) — keep reveal
+  const flipBtn = c.querySelector(".flip-btn");
+  if(flipBtn) flipBtn.style.display = "none";
+  // hook reveal to also show recall buttons
+  const revealBtn = c.querySelector(".reveal-btn");
+  revealBtn.setAttribute("onclick", "toggleRevealReview()");
+}
+
+function toggleRevealReview(){
+  const c = document.getElementById("card-rv");
+  c.classList.toggle("revealed");
+  const btn = c.querySelector(".reveal-btn");
+  const lbl = c.querySelector(".rv-label");
+  const revealed = c.classList.contains("revealed");
+  btn.classList.toggle("open", revealed);
+  lbl.textContent = revealed ? "הסתר" : "חשוף";
+  // recall buttons stay visible the whole time — reveal only flips the card content
+  const hint = document.getElementById("rvHint");
+  if(hint) hint.style.display = revealed ? "none" : "block";
+}
+
+function recall(remembered){
+  if(!RV) return;
+  const word = RV.queue.shift();
+  RV.passSeen++;
+  if(remembered){
+    RV.done++;
+  } else {
+    RV.queue.push(word);  // returns in the next round
+    RV.nextRound.push(word);
+  }
+  // a round ends when we've consumed every card scheduled for this pass
+  if(RV.passSeen >= RV.passSize){
+    if(RV.nextRound.length > 0){
+      RV.round++;
+      RV.passSize = RV.nextRound.length;
+      RV.passSeen = 0;
+      RV.nextRound = [];
+    }
+  }
+  nextReviewCard();
+}
+
+function reviewSummary(){
+  const tries = RV.tries;
+  const hard = Object.keys(tries).filter(w=>tries[w]>1).sort((a,b)=>tries[b]-tries[a]);
+  const totalShows = Object.values(tries).reduce((a,b)=>a+b,0);
+  const perfect = hard.length === 0;
+  const hardList = hard.map(w=>{
+    const d = LEXICON[w]||{};
+    return `<li><span class="hw">${w} <span style="font-size:.85rem;color:var(--mute)">${d.translit||""}</span></span>
+            <span class="tries">${tries[w]} פעמים</span></li>`;
+  }).join("");
+
+  document.getElementById("rvBody").innerHTML = `
+    <div class="rv-summary">
+      <div class="big-num">${RV.total}</div>
+      <h3>${perfect ? "כל הכבוד! זכרת הכול מהפעם הראשונה 🎉" : "סיימת את הסיבוב 🎴"}</h3>
+      <div class="line">עברת על <b>${RV.total}</b> מילים</div>
+      <div class="line">סך הצגות: <b>${totalShows}</b></div>
+      ${hard.length ? `
+        <div class="rv-hard">
+          <div class="label">מילים שדרשו יותר מסיבוב אחד</div>
+          <ul>${hardList}</ul>
+        </div>` : ""}
+      <div class="rv-summary-actions">
+        ${hard.length ? `<button class="rv-again" onclick="reviewHardOnly()">תרגל שוב את הקשות (${hard.length})</button>` : ""}
+        <button class="rv-again" onclick="restartReview()">סיבוב חדש מההתחלה</button>
+        <button class="rv-done" onclick="endReview()">סיום</button>
+      </div>
+    </div>`;
+  document.getElementById("rvFill").style.width = "100%";
+  document.getElementById("rvLeft").textContent = 0;
+}
+
+function restartReview(){
+  const flipped = RV ? RV.flipped : false;
+  RV = {
+    queue: shuffle(LOADED_WORDS), total: LOADED_WORDS.length,
+    done:0, round:1, flipped, tries:{},
+    passSize: LOADED_WORDS.length, passSeen:0, nextRound:[]
+  };
+  LOADED_WORDS.forEach(w=>RV.tries[w]=0);
+  nextReviewCard();
+}
+
+function reviewHardOnly(){
+  const hard = Object.keys(RV.tries).filter(w=>RV.tries[w]>1);
+  if(!hard.length){ return restartReview(); }
+  const flipped = RV.flipped;
+  RV = {
+    queue: shuffle(hard), total: hard.length,
+    done:0, round:1, flipped, tries:{},
+    passSize: hard.length, passSeen:0, nextRound:[]
+  };
+  hard.forEach(w=>RV.tries[w]=0);
+  nextReviewCard();
+}
+
+// טען דמו ראשוני
+function initApp(){
+  try{
+    document.getElementById("input").value = "صحن\nمخلل\nبقدونس\nحبة\nحُط\nبدون\nفحص\nإرتاح\nقرر\nزينة\nغدا\nلمّا\nطفى\nركض\nنقل\nتبّع\nلطيف\nساحر\nإلى\nأرنب\nدوّر على\nلاقى\nتوتّر\nمسك\nطول الوقت\nورقة\nكمّل\nتطلّع\nملوّن\nغيمة\nوصل\nنشّف\nإكتشف\nعادة\nإستقبل\nزار\nصينية\nمعمول\nحتى\nبناية\nقصة\nإمتحان\nمحطة\nخاف\nتأخر\nخسر\nصديق\nساق\nرصيف\nضو\nممنون\nوصّل\nيبدأ\nساوى\nسافر\nجاوب\nحافظ\nحاول\nسامح\nحب\nمشي\nقديم\nطلب\nسادة\nدايمًا\nموّى\nورا\nضعيف\nبيّن\nإنها\nجوعان\nدخّل\nخلّى\nوافق\nدار باله\nنظف\nسمّى\nلعب\nرزان\nجنينة\nدافي\nزهرة\nجوري\nمرمية\nغنّى\nواطي\nعصفور\nطار\nحواليها\nعم";
+    build();
+  }catch(err){
+    var deck = document.getElementById("deck");
+    if(deck) deck.innerHTML = '<div class="empty" style="direction:rtl">אירעה שגיאה בטעינה: '+(err && err.message ? err.message : err)+'</div>';
+  }
+}
+// Run now if the DOM is already parsed (common when opening a local file on iOS),
+// otherwise wait for the event. Either way, init runs exactly once.
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", initApp);
+} else {
+  initApp();
+}
+
+// PWA: register service worker for offline use (silently no-ops if unsupported)
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){ /* offline mode unavailable */ });
+  });
+}
+
+</script>
+</body>
+</html>
